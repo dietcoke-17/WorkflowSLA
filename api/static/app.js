@@ -1,21 +1,22 @@
 /**
- * WorkflowSLA: Enterprise Dashboard Client
- * Production B2B interface controller implementing tab management,
- * synchronized slider/numeric inputs, real-time recalculations,
- * search filters, and dual-currency formatting.
+ * WorkflowSLA: High-Level SaaS Client (Linear / Stripe Inspired)
+ * Implements theme toggle persistence, real-time reactive modeling,
+ * two-way slider synchronization, and instant table search.
  */
 
 let currentCurrency = "USD";
 let cachedCorridors = [];
-let lastSyncTimestamp = new Date();
 
-// DOM Elements
-const elements = {
+// DOM References
+const dom = {
+  // Theme Toggle
+  btnThemeToggle: document.getElementById("btn-theme-toggle"),
+
   // Tabs
-  tabButtons: document.querySelectorAll(".tab-btn"),
-  tabPanels: document.querySelectorAll(".tab-content"),
+  tabButtons: document.querySelectorAll(".seg-btn"),
+  tabPanes: document.querySelectorAll(".tab-pane"),
 
-  // KPIs
+  // Overview KPIs
   kpiTotalTickets: document.getElementById("kpi-total-tickets"),
   kpiTotalTransitions: document.getElementById("kpi-total-transitions"),
   kpiBreachRate: document.getElementById("kpi-breach-rate"),
@@ -25,7 +26,7 @@ const elements = {
   kpiWeeklyLeakage: document.getElementById("kpi-weekly-leakage"),
   kpiInrBenchmark: document.getElementById("kpi-inr-benchmark"),
 
-  // Bottlenecks & Recommendations
+  // Bottlenecks & Playbook
   topBottlenecksList: document.getElementById("top-bottlenecks-list"),
   paretoSummaryPill: document.getElementById("pareto-summary-pill"),
   rfcsContainer: document.getElementById("rfcs-container"),
@@ -46,6 +47,8 @@ const elements = {
   currSym2: document.getElementById("currency-sym-2"),
   aovBoundMin: document.getElementById("aov-bound-min"),
   aovBoundMax: document.getElementById("aov-bound-max"),
+  opsBoundMin: document.getElementById("ops-bound-min"),
+  opsBoundMax: document.getElementById("ops-bound-max"),
 
   // Simulator Outputs
   simOutWeeklyTotal: document.getElementById("sim-out-weekly-total"),
@@ -53,7 +56,7 @@ const elements = {
   simOutWeeklyGmv: document.getElementById("sim-out-weekly-gmv"),
   simOutWeeklyOps: document.getElementById("sim-out-weekly-ops"),
 
-  // Scenarios
+  // Scenario Table
   scValConsWeekly: document.getElementById("sc-val-cons-weekly"),
   scValConsTotal: document.getElementById("sc-val-cons-total"),
   scValBaseWeekly: document.getElementById("sc-val-base-weekly"),
@@ -61,225 +64,247 @@ const elements = {
   scValAggrWeekly: document.getElementById("sc-val-aggr-weekly"),
   scValAggrTotal: document.getElementById("sc-val-aggr-total"),
 
-  // Corridor Table & Search
+  // Table & Search
   corridorSearch: document.getElementById("corridor-search"),
   corridorsTableBody: document.getElementById("corridors-table-body"),
 
-  // Actions
+  // Top Nav Actions
   btnRefresh: document.getElementById("btn-refresh"),
   btnReseed: document.getElementById("btn-reseed"),
   btnCopySql: document.getElementById("btn-copy-sql"),
   lastSyncTime: document.getElementById("last-sync-time"),
 };
 
-/** Tab Navigation Controller */
-function initTabs() {
-  elements.tabButtons.forEach(btn => {
+/** Theme Toggling per Modern Web Guidance (dark-mode-toggle) */
+function initThemeToggle() {
+  if (!dom.btnThemeToggle) return;
+
+  dom.btnThemeToggle.addEventListener("click", () => {
+    const metaTag = document.querySelector('meta[name="color-scheme"]');
+    const currentTheme = metaTag ? metaTag.content : "dark";
+    const targetTheme = currentTheme === "dark" ? "light" : "dark";
+
+    if (metaTag) {
+      metaTag.content = targetTheme;
+    }
+    try {
+      localStorage.setItem("color-scheme", targetTheme);
+    } catch (e) {}
+  });
+}
+
+/** Segmented Tab Navigation Controller */
+function initTabNavigation() {
+  dom.tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       const targetId = btn.getAttribute("data-tab");
 
-      elements.tabButtons.forEach(b => {
+      dom.tabButtons.forEach(b => {
         b.classList.remove("active");
         b.setAttribute("aria-selected", "false");
       });
-      elements.tabPanels.forEach(p => {
+      dom.tabPanes.forEach(p => {
         p.classList.remove("active");
         p.hidden = true;
       });
 
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
-      const targetPanel = document.getElementById(targetId);
-      if (targetPanel) {
-        targetPanel.classList.add("active");
-        targetPanel.hidden = false;
+      const targetPane = document.getElementById(targetId);
+      if (targetPane) {
+        targetPane.classList.add("active");
+        targetPane.hidden = false;
       }
     });
   });
 }
 
-/** Fetch Bottleneck Analytics from API */
+/** Fetch Bottleneck Analytics from REST API */
 async function fetchBottlenecks() {
-  const aov = elements.numAov.value;
-  const dailyTx = elements.numDailyTx.value;
-  const revDrop = (parseFloat(elements.numRevDrop.value) / 100.0).toFixed(4);
-  const opsCost = elements.numOpsCost.value;
+  const aov = dom.numAov.value;
+  const dailyTx = dom.numDailyTx.value;
+  const revDrop = (parseFloat(dom.numRevDrop.value) / 100.0).toFixed(4);
+  const opsCost = dom.numOpsCost.value;
 
   try {
     const url = `/analyze-bottlenecks?aov=${aov}&daily_tx=${dailyTx}&rev_drop_per_hr=${revDrop}&ops_cost_per_hr=${opsCost}&currency=${currentCurrency}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to load analysis");
+    if (!res.ok) throw new Error("API call failed");
     const data = await res.json();
-    renderAnalysis(data);
-    updateSyncTimestamp();
+    renderDashboard(data);
+    updateSyncTime();
   } catch (err) {
-    console.error("API Error in fetchBottlenecks:", err);
+    console.error("fetchBottlenecks error:", err);
   }
 }
 
-/** Fetch All Corridor Friction Metrics */
+/** Fetch All Corridor Pair Data */
 async function fetchCorridors() {
   try {
     const res = await fetch("/metrics/department-friction");
-    if (!res.ok) throw new Error("Failed to load corridors");
+    if (!res.ok) throw new Error("Failed to load friction data");
     cachedCorridors = await res.json();
-    renderCorridors(cachedCorridors);
+    renderCorridorsTable(cachedCorridors);
   } catch (err) {
-    console.error("API Error in fetchCorridors:", err);
+    console.error("fetchCorridors error:", err);
   }
 }
 
-/** Render Overview KPIs, Bottlenecks, and Proposals */
-function renderAnalysis(data) {
+/** Render Overview KPIs, Bottlenecks, and RFCs */
+function renderDashboard(data) {
   const ent = data.enterprise_summary || {};
   const impact = data.quantified_revenue_impact || {};
   const worstHandoffs = data.worst_performing_handoffs || [];
   const recs = data.data_backed_recommendations || [];
 
-  // 1. Executive KPIs
-  if (elements.kpiTotalTickets) elements.kpiTotalTickets.textContent = Number(ent.total_tickets || 10000).toLocaleString();
-  if (elements.kpiTotalTransitions) elements.kpiTotalTransitions.textContent = Number(ent.total_transitions || 23356).toLocaleString();
-  if (elements.kpiBreachRate) elements.kpiBreachRate.textContent = `${ent.overall_breach_rate_pct || 28.09}%`;
-  if (elements.kpiBreachedCount) elements.kpiBreachedCount.textContent = Number(ent.total_breached_transitions || 6560).toLocaleString();
-  if (elements.kpiTotalDelay) elements.kpiTotalDelay.textContent = `${Math.round(ent.total_breach_hours || impact.total_delay_hours).toLocaleString()} hrs`;
-  if (elements.kpiAvgDuration) elements.kpiAvgDuration.textContent = `${ent.avg_transition_hours || 16.7} hrs`;
-  if (elements.kpiWeeklyLeakage) elements.kpiWeeklyLeakage.textContent = `${impact.formatted_weekly_leakage || "$1.30M"} / wk`;
-  if (elements.kpiInrBenchmark) elements.kpiInrBenchmark.textContent = impact.inr_benchmark_weekly_leakage || "800.71 Lakh / week";
+  // 1. Metric Tiles
+  if (dom.kpiTotalTickets) dom.kpiTotalTickets.textContent = Number(ent.total_tickets || 10000).toLocaleString();
+  if (dom.kpiTotalTransitions) dom.kpiTotalTransitions.textContent = Number(ent.total_transitions || 23356).toLocaleString();
+  if (dom.kpiBreachRate) dom.kpiBreachRate.textContent = `${ent.overall_breach_rate_pct || 28.09}%`;
+  if (dom.kpiBreachedCount) dom.kpiBreachedCount.textContent = Number(ent.total_breached_transitions || 6560).toLocaleString();
+  if (dom.kpiTotalDelay) dom.kpiTotalDelay.textContent = `${Math.round(ent.total_breach_hours || impact.total_delay_hours).toLocaleString()}h`;
+  if (dom.kpiAvgDuration) dom.kpiAvgDuration.textContent = `${ent.avg_transition_hours || 16.7}h`;
+  if (dom.kpiWeeklyLeakage) dom.kpiWeeklyLeakage.textContent = impact.formatted_weekly_leakage || "$1.30M";
+  if (dom.kpiInrBenchmark) dom.kpiInrBenchmark.textContent = impact.inr_benchmark_weekly_leakage || "800.71 Lakh / week";
 
-  // 2. Top Bottlenecks Cards
-  if (elements.topBottlenecksList) {
-    elements.topBottlenecksList.innerHTML = "";
+  // 2. Critical Bottlenecks (Linear Pipeline Card Look)
+  if (dom.topBottlenecksList) {
+    dom.topBottlenecksList.innerHTML = "";
     let cumulative = 0;
 
     worstHandoffs.forEach(bn => {
       cumulative += bn.delay_share_pct;
       const card = document.createElement("div");
-      card.className = "corridor-card";
+      card.className = "corridor-item";
       card.innerHTML = `
-        <div class="cc-header">
-          <div class="cc-left">
-            <span class="cc-rank">RANK #${bn.bottleneck_rank}</span>
-            <span class="cc-corridor-title">${bn.handoff_corridor} (${bn.from_department} &rarr; ${bn.to_department})</span>
+        <div class="ci-header">
+          <div class="ci-flow">
+            <span class="ci-rank-pill">#${bn.bottleneck_rank} CORRIDOR</span>
+            <div class="ci-nodes">
+              <span>${bn.from_department}</span>
+              <span class="ci-arrow">&rarr;</span>
+              <span>${bn.to_department}</span>
+            </div>
           </div>
-          <span class="cc-share-badge">${bn.delay_share_pct}% Enterprise Delay</span>
+          <span class="ci-share-text">${bn.delay_share_pct}% Total Delay</span>
         </div>
-        <div class="cc-bar-wrap">
-          <div class="cc-bar-fill" style="width: ${bn.delay_share_pct}%;"></div>
+        <div class="ci-progress-bar">
+          <div class="ci-progress-fill" style="width: ${bn.delay_share_pct}%;"></div>
         </div>
-        <div class="cc-metrics-grid">
-          <div class="cc-metric-col">
-            <span class="label">SLA Breach Rate</span>
-            <span class="val text-alert">${bn.breach_rate_pct}% (${Number(bn.breach_count).toLocaleString()})</span>
+        <div class="ci-stats-row">
+          <div class="ci-stat">
+            <span class="stat-lbl">Breach Frequency</span>
+            <span class="stat-val text-amber">${bn.breach_rate_pct}% (${Number(bn.breach_count).toLocaleString()} breaches)</span>
           </div>
-          <div class="cc-metric-col">
-            <span class="label">Average Duration</span>
-            <span class="val">${bn.avg_duration_hours}h <small style="color:var(--text-muted);">(SLA: ${bn.sla_target_hours}h)</small></span>
+          <div class="ci-stat">
+            <span class="stat-lbl">Mean Duration</span>
+            <span class="stat-val">${bn.avg_duration_hours}h <small style="color:var(--text-muted);">(SLA: ${bn.sla_target_hours}h)</small></span>
           </div>
-          <div class="cc-metric-col">
-            <span class="label">Weekly Leakage</span>
-            <span class="val text-danger">${bn.formatted_weekly_leakage}</span>
+          <div class="ci-stat">
+            <span class="stat-lbl">Weekly Leakage</span>
+            <span class="stat-val text-rose">${bn.formatted_weekly_leakage} / wk</span>
           </div>
-          <div class="cc-metric-col">
-            <span class="label">INR Benchmark</span>
-            <span class="val">₹${bn.inr_lakhs_per_week} L/wk</span>
+          <div class="ci-stat">
+            <span class="stat-lbl">INR Equivalent</span>
+            <span class="stat-val">₹${bn.inr_lakhs_per_week} L/wk</span>
           </div>
         </div>
       `;
-      elements.topBottlenecksList.appendChild(card);
+      dom.topBottlenecksList.appendChild(card);
     });
 
-    if (elements.paretoSummaryPill) {
-      elements.paretoSummaryPill.textContent = `${cumulative.toFixed(1)}% Combined Delay Share`;
+    if (dom.paretoSummaryPill) {
+      dom.paretoSummaryPill.innerHTML = `<span class="badge-dot"></span><span>${cumulative.toFixed(1)}% Combined Delay Share</span>`;
     }
   }
 
   // 3. Process RFCs (Tab 3)
-  if (elements.rfcsContainer) {
-    elements.rfcsContainer.innerHTML = "";
+  if (dom.rfcsContainer) {
+    dom.rfcsContainer.innerHTML = "";
     recs.forEach((rec, idx) => {
-      const rfc = document.createElement("div");
-      rfc.className = "rfc-card";
-      rfc.innerHTML = `
-        <div class="rfc-top">
-          <span class="rfc-id">RFC-OPS-${100 + idx} &bull; ${rec.corridor}</span>
-          <span class="rfc-confidence">${Math.round(rec.confidence_score * 100)}% Confidence</span>
+      const tile = document.createElement("div");
+      tile.className = "rfc-tile";
+      tile.innerHTML = `
+        <div class="rfc-tile-header">
+          <span class="rfc-chip">RFC-0${idx + 1} &bull; ${rec.corridor}</span>
+          <span class="rfc-conf">${Math.round(rec.confidence_score * 100)}% Confidence</span>
         </div>
-        <div class="rfc-title">${rec.recommendation}</div>
-        <div class="rfc-action">${rec.action_item}</div>
-        <div class="rfc-metrics-grid">
-          <div class="rfc-metric">
-            <span class="label">Reclaimable Hours</span>
-            <span class="val success">&darr; ${rec.projected_reclaimed_hours_weekly} hrs / week</span>
+        <h3 class="rfc-headline">${rec.recommendation}</h3>
+        <p class="rfc-blueprint">${rec.action_item}</p>
+        <div class="rfc-roi-grid">
+          <div class="rfc-roi-item">
+            <span class="lbl">Reclaimable Effort</span>
+            <span class="val emerald">&darr; ${rec.projected_reclaimed_hours_weekly} hrs / week</span>
           </div>
-          <div class="rfc-metric">
-            <span class="label">Weekly ROI Savings</span>
-            <span class="val success">${rec.formatted_weekly_savings} / wk</span>
+          <div class="rfc-roi-item">
+            <span class="lbl">Weekly Savings</span>
+            <span class="val emerald">${rec.formatted_weekly_savings} / week</span>
           </div>
-          <div class="rfc-metric">
-            <span class="label">Annual Projected Value</span>
+          <div class="rfc-roi-item">
+            <span class="lbl">Annual Projected Value</span>
             <span class="val">${rec.formatted_annual_savings}</span>
           </div>
-          <div class="rfc-metric">
-            <span class="label">Implementation Effort</span>
+          <div class="rfc-roi-item">
+            <span class="lbl">Implementation Velocity</span>
             <span class="val">${rec.implementation_effort}</span>
           </div>
         </div>
       `;
-      elements.rfcsContainer.appendChild(rfc);
+      dom.rfcsContainer.appendChild(tile);
     });
   }
 
   // 4. Simulator Output Column
-  if (elements.simOutWeeklyTotal) elements.simOutWeeklyTotal.textContent = impact.formatted_weekly_leakage || "$1,298,168";
-  if (elements.simOutInrBenchmark) elements.simOutInrBenchmark.textContent = `Equivalent: ${impact.inr_benchmark_weekly_leakage || '800.71 Lakh / week'}`;
-  if (elements.simOutWeeklyGmv) elements.simOutWeeklyGmv.textContent = formatCurrencyAmount(impact.weekly_gmv_leaked);
-  if (elements.simOutWeeklyOps) elements.simOutWeeklyOps.textContent = formatCurrencyAmount(impact.weekly_operational_cost);
+  if (dom.simOutWeeklyTotal) dom.simOutWeeklyTotal.textContent = impact.formatted_weekly_leakage || "$1,298,168";
+  if (dom.simOutInrBenchmark) dom.simOutInrBenchmark.textContent = `Equivalent: ${impact.inr_benchmark_weekly_leakage || '800.71 Lakh / week'}`;
+  if (dom.simOutWeeklyGmv) dom.simOutWeeklyGmv.textContent = formatCurrency(impact.weekly_gmv_leaked);
+  if (dom.simOutWeeklyOps) dom.simOutWeeklyOps.textContent = formatCurrency(impact.weekly_operational_cost);
 
   // 5. Sensitivity Scenarios
   const sc = impact.sensitivity_scenarios || {};
   if (sc.conservative) {
-    if (elements.scValConsWeekly) elements.scValConsWeekly.textContent = sc.conservative.formatted_weekly_leakage;
-    if (elements.scValConsTotal) elements.scValConsTotal.textContent = formatCurrencyAmount(sc.conservative.weekly_leakage * (90 / 7));
+    if (dom.scValConsWeekly) dom.scValConsWeekly.textContent = sc.conservative.formatted_weekly_leakage;
+    if (dom.scValConsTotal) dom.scValConsTotal.textContent = formatCurrency(sc.conservative.weekly_leakage * (90 / 7));
   }
   if (sc.baseline) {
-    if (elements.scValBaseWeekly) elements.scValBaseWeekly.textContent = sc.baseline.formatted_weekly_leakage;
-    if (elements.scValBaseTotal) elements.scValBaseTotal.textContent = impact.formatted_total_leakage;
+    if (dom.scValBaseWeekly) dom.scValBaseWeekly.textContent = sc.baseline.formatted_weekly_leakage;
+    if (dom.scValBaseTotal) dom.scValBaseTotal.textContent = impact.formatted_total_leakage;
   }
   if (sc.aggressive) {
-    if (elements.scValAggrWeekly) elements.scValAggrWeekly.textContent = sc.aggressive.formatted_weekly_leakage;
-    if (elements.scValAggrTotal) elements.scValAggrTotal.textContent = formatCurrencyAmount(sc.aggressive.weekly_leakage * (90 / 7));
+    if (dom.scValAggrWeekly) dom.scValAggrWeekly.textContent = sc.aggressive.formatted_weekly_leakage;
+    if (dom.scValAggrTotal) dom.scValAggrTotal.textContent = formatCurrency(sc.aggressive.weekly_leakage * (90 / 7));
   }
 }
 
-/** Render Table of All Department Corridors */
-function renderCorridors(corridors) {
-  if (!elements.corridorsTableBody) return;
-  elements.corridorsTableBody.innerHTML = "";
+/** Render Table of Department Corridors */
+function renderCorridorsTable(corridors) {
+  if (!dom.corridorsTableBody) return;
+  dom.corridorsTableBody.innerHTML = "";
 
   corridors.forEach(c => {
     const tr = document.createElement("tr");
-    const isBreachHigh = c.breach_rate_pct > 25.0;
+    const isHighBreach = c.breach_rate_pct > 25.0;
     tr.innerHTML = `
       <td><strong>${c.from_code} &rarr; ${c.to_code}</strong></td>
       <td>${c.from_department}</td>
       <td>${c.to_department}</td>
-      <td class="num-col">${Number(c.total_transitions).toLocaleString()}</td>
-      <td class="num-col">${c.avg_duration_hours}h</td>
-      <td class="num-col">${c.avg_sla_target_hours}h</td>
-      <td class="num-col">
-        <span class="status-badge ${isBreachHigh ? 'breach-high' : 'breach-low'}">
+      <td class="num-align">${Number(c.total_transitions).toLocaleString()}</td>
+      <td class="num-align">${c.avg_duration_hours}h</td>
+      <td class="num-align">${c.avg_sla_target_hours}h</td>
+      <td class="num-align">
+        <span class="tag-breach ${isHighBreach ? 'severe' : 'nominal'}">
           ${c.breach_rate_pct}%
         </span>
       </td>
-      <td class="num-col"><strong>${Math.round(c.total_breach_hours).toLocaleString()}h</strong></td>
-      <td class="num-col">${c.total_blockers}</td>
+      <td class="num-align"><strong>${Math.round(c.total_breach_hours).toLocaleString()}h</strong></td>
+      <td class="num-align">${c.total_blockers}</td>
     `;
-    elements.corridorsTableBody.appendChild(tr);
+    dom.corridorsTableBody.appendChild(tr);
   });
 }
 
 /** Currency Formatter */
-function formatCurrencyAmount(amount) {
+function formatCurrency(amount) {
   if (!amount) return "$0";
   if (currentCurrency === "INR") {
     if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
@@ -296,101 +321,104 @@ function formatCurrencyAmount(amount) {
   return `$${Number(amount).toLocaleString()}`;
 }
 
-/** Update Live Sync Timestamp */
-function updateSyncTimestamp() {
-  lastSyncTimestamp = new Date();
-  if (elements.lastSyncTime) {
-    elements.lastSyncTime.textContent = "Synced just now";
+/** Live Sync Timestamp */
+function updateSyncTime() {
+  if (dom.lastSyncTime) {
+    dom.lastSyncTime.textContent = "Synced just now";
   }
 }
 
-/** Setup Event Listeners for Simulator & Table Filters */
-function setupEventListeners() {
-  // Synchronize Slider <-> Numeric Input for AOV
-  elements.sliderAov.addEventListener("input", () => {
-    elements.numAov.value = elements.sliderAov.value;
+/** Wire Event Handlers */
+function setupEventHandlers() {
+  // AOV Synchronized Controls
+  dom.sliderAov.addEventListener("input", () => {
+    dom.numAov.value = dom.sliderAov.value;
     fetchBottlenecks();
   });
-  elements.numAov.addEventListener("input", () => {
-    elements.sliderAov.value = elements.numAov.value;
-    fetchBottlenecks();
-  });
-
-  // Synchronize Slider <-> Numeric Input for Daily Tx
-  elements.sliderDailyTx.addEventListener("input", () => {
-    elements.numDailyTx.value = elements.sliderDailyTx.value;
-    fetchBottlenecks();
-  });
-  elements.numDailyTx.addEventListener("input", () => {
-    elements.sliderDailyTx.value = elements.numDailyTx.value;
+  dom.numAov.addEventListener("input", () => {
+    dom.sliderAov.value = dom.numAov.value;
     fetchBottlenecks();
   });
 
-  // Synchronize Slider <-> Numeric Input for Rev Drop
-  elements.sliderRevDrop.addEventListener("input", () => {
-    elements.numRevDrop.value = elements.sliderRevDrop.value;
+  // Daily Tx Synchronized Controls
+  dom.sliderDailyTx.addEventListener("input", () => {
+    dom.numDailyTx.value = dom.sliderDailyTx.value;
     fetchBottlenecks();
   });
-  elements.numRevDrop.addEventListener("input", () => {
-    elements.sliderRevDrop.value = elements.numRevDrop.value;
+  dom.numDailyTx.addEventListener("input", () => {
+    dom.sliderDailyTx.value = dom.numDailyTx.value;
     fetchBottlenecks();
   });
 
-  // Synchronize Slider <-> Numeric Input for Ops Cost
-  elements.sliderOpsCost.addEventListener("input", () => {
-    elements.numOpsCost.value = elements.sliderOpsCost.value;
+  // Rev Drop Synchronized Controls
+  dom.sliderRevDrop.addEventListener("input", () => {
+    dom.numRevDrop.value = dom.sliderRevDrop.value;
     fetchBottlenecks();
   });
-  elements.numOpsCost.addEventListener("input", () => {
-    elements.sliderOpsCost.value = elements.numOpsCost.value;
+  dom.numRevDrop.addEventListener("input", () => {
+    dom.sliderRevDrop.value = dom.numRevDrop.value;
+    fetchBottlenecks();
+  });
+
+  // Ops Cost Synchronized Controls
+  dom.sliderOpsCost.addEventListener("input", () => {
+    dom.numOpsCost.value = dom.sliderOpsCost.value;
+    fetchBottlenecks();
+  });
+  dom.numOpsCost.addEventListener("input", () => {
+    dom.sliderOpsCost.value = dom.numOpsCost.value;
     fetchBottlenecks();
   });
 
   // Currency Switcher
-  elements.currencySelect.addEventListener("change", (e) => {
+  dom.currencySelect.addEventListener("change", (e) => {
     currentCurrency = e.target.value;
     const sym = currentCurrency === "INR" ? "₹" : (currentCurrency === "EUR" ? "€" : "$");
-    if (elements.currSym1) elements.currSym1.textContent = sym;
-    if (elements.currSym2) elements.currSym2.textContent = sym;
+    if (dom.currSym1) dom.currSym1.textContent = sym;
+    if (dom.currSym2) dom.currSym2.textContent = sym;
 
     if (currentCurrency === "INR") {
-      elements.sliderAov.min = 500;
-      elements.sliderAov.max = 15000;
-      elements.sliderAov.step = 250;
-      elements.sliderAov.value = 3500;
-      elements.numAov.value = 3500;
-      elements.aovBoundMin.textContent = "₹500";
-      elements.aovBoundMax.textContent = "₹15,000";
+      dom.sliderAov.min = 500;
+      dom.sliderAov.max = 15000;
+      dom.sliderAov.step = 250;
+      dom.sliderAov.value = 3500;
+      dom.numAov.value = 3500;
+      dom.aovBoundMin.textContent = "₹500";
+      dom.aovBoundMax.textContent = "₹15,000";
 
-      elements.sliderOpsCost.min = 500;
-      elements.sliderOpsCost.max = 10000;
-      elements.sliderOpsCost.step = 250;
-      elements.sliderOpsCost.value = 2500;
-      elements.numOpsCost.value = 2500;
+      dom.sliderOpsCost.min = 500;
+      dom.sliderOpsCost.max = 10000;
+      dom.sliderOpsCost.step = 250;
+      dom.sliderOpsCost.value = 2500;
+      dom.numOpsCost.value = 2500;
+      dom.opsBoundMin.textContent = "₹500/hr";
+      dom.opsBoundMax.textContent = "₹10,000/hr";
     } else {
-      elements.sliderAov.min = 10;
-      elements.sliderAov.max = 250;
-      elements.sliderAov.step = 5;
-      elements.sliderAov.value = 45;
-      elements.numAov.value = 45;
-      elements.aovBoundMin.textContent = "$10";
-      elements.aovBoundMax.textContent = "$250";
+      dom.sliderAov.min = 10;
+      dom.sliderAov.max = 250;
+      dom.sliderAov.step = 5;
+      dom.sliderAov.value = 45;
+      dom.numAov.value = 45;
+      dom.aovBoundMin.textContent = "$10";
+      dom.aovBoundMax.textContent = "$250";
 
-      elements.sliderOpsCost.min = 20;
-      elements.sliderOpsCost.max = 200;
-      elements.sliderOpsCost.step = 5;
-      elements.sliderOpsCost.value = 65;
-      elements.numOpsCost.value = 65;
+      dom.sliderOpsCost.min = 20;
+      dom.sliderOpsCost.max = 200;
+      dom.sliderOpsCost.step = 5;
+      dom.sliderOpsCost.value = 65;
+      dom.numOpsCost.value = 65;
+      dom.opsBoundMin.textContent = "$20/hr";
+      dom.opsBoundMax.textContent = "$200/hr";
     }
     fetchBottlenecks();
   });
 
   // Search Filter on Table
-  if (elements.corridorSearch) {
-    elements.corridorSearch.addEventListener("input", (e) => {
+  if (dom.corridorSearch) {
+    dom.corridorSearch.addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase().trim();
       if (!q) {
-        renderCorridors(cachedCorridors);
+        renderCorridorsTable(cachedCorridors);
         return;
       }
       const filtered = cachedCorridors.filter(c =>
@@ -399,26 +427,26 @@ function setupEventListeners() {
         c.from_department.toLowerCase().includes(q) ||
         c.to_department.toLowerCase().includes(q)
       );
-      renderCorridors(filtered);
+      renderCorridorsTable(filtered);
     });
   }
 
   // Refresh Button
-  if (elements.btnRefresh) {
-    elements.btnRefresh.addEventListener("click", () => {
+  if (dom.btnRefresh) {
+    dom.btnRefresh.addEventListener("click", () => {
       fetchBottlenecks();
       fetchCorridors();
     });
   }
 
   // Reseed Dataset Button
-  if (elements.btnReseed) {
-    elements.btnReseed.addEventListener("click", async () => {
+  if (dom.btnReseed) {
+    dom.btnReseed.addEventListener("click", async () => {
       const confirmed = confirm("Reseed 10,000+ workflow tickets & 23,000+ transitions?");
       if (!confirmed) return;
 
-      elements.btnReseed.textContent = "Reseeding (10k)...";
-      elements.btnReseed.disabled = true;
+      dom.btnReseed.innerHTML = "<span>Reseeding...</span>";
+      dom.btnReseed.disabled = true;
 
       try {
         const res = await fetch("/seed-database?ticket_count=10000", { method: "POST" });
@@ -429,21 +457,21 @@ function setupEventListeners() {
       } catch (err) {
         alert("Error reseeding dataset: " + err);
       } finally {
-        elements.btnReseed.textContent = "Reseed 10k Dataset";
-        elements.btnReseed.disabled = false;
+        dom.btnReseed.innerHTML = "<span>Reseed 10k</span>";
+        dom.btnReseed.disabled = false;
       }
     });
   }
 
   // Copy SQL Button
-  if (elements.btnCopySql) {
-    elements.btnCopySql.addEventListener("click", () => {
+  if (dom.btnCopySql) {
+    dom.btnCopySql.addEventListener("click", () => {
       const code = document.getElementById("sql-code-display")?.innerText;
       if (code) {
         navigator.clipboard.writeText(code).then(() => {
-          elements.btnCopySql.textContent = "Copied!";
+          dom.btnCopySql.innerHTML = "<span>Copied!</span>";
           setTimeout(() => {
-            elements.btnCopySql.textContent = "Copy SQL";
+            dom.btnCopySql.innerHTML = "<span>Copy SQL</span>";
           }, 2000);
         });
       }
@@ -453,8 +481,9 @@ function setupEventListeners() {
 
 // Initial Boot
 window.addEventListener("DOMContentLoaded", () => {
-  initTabs();
-  setupEventListeners();
+  initThemeToggle();
+  initTabNavigation();
+  setupEventHandlers();
   fetchBottlenecks();
   fetchCorridors();
 });
