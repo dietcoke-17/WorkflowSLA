@@ -3,207 +3,457 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WorkflowSLA: Cross-Functional Operations & Blockage Tracker</title>
+  <!-- MANDATORY: Declare support for both light and dark themes per Modern Web Guidance -->
+  <meta name="color-scheme" content="light dark">
+  <title>WorkflowSLA &mdash; Cross-Functional Operations & Blockage Tracker</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Header Bar -->
-  <header class="navbar">
-    <div class="nav-brand">
-      <div class="logo-badge">WSLA</div>
-      <div>
-        <h1 class="brand-title">WorkflowSLA</h1>
-        <p class="brand-subtitle">Cross-Functional Operations & Blockage Tracker</p>
+  <!-- Enterprise Top App Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="app-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
       </div>
+      <div class="header-breadcrumb">
+        <span class="org-name">Enterprise Operations</span>
+        <span class="breadcrumb-separator" aria-hidden="true">/</span>
+        <span class="project-title">WorkflowSLA</span>
+      </div>
+      <span class="env-tag">Production Audit</span>
     </div>
-    <div class="nav-actions">
-      <span class="badge badge-pulse" id="system-status">● Live Engine</span>
-      <a href="/docs" target="_blank" class="btn btn-secondary">API Docs (Swagger)</a>
-      <button id="btn-reseed" class="btn btn-outline" title="Reseed 10,000+ tickets">Reseed Data</button>
+
+    <div class="header-right">
+      <div class="sync-status">
+        <span class="status-indicator live" aria-hidden="true"></span>
+        <span class="sync-text">Connected &bull; PostgreSQL/SQLite</span>
+        <span class="sync-time" id="last-sync-time">Synced just now</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-refresh" class="btn btn-secondary" title="Reload live metrics">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Refresh
+        </button>
+        <button id="btn-reseed" class="btn btn-outline" title="Reseed synthetic workflow dataset">
+          Reseed 10k Dataset
+        </button>
+        <a href="/docs" target="_blank" class="btn btn-primary" title="Open OpenAPI / Swagger Docs">
+          API Specs
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+      </div>
     </div>
   </header>
 
-  <main class="container">
-    <!-- Executive KPI Row -->
-    <section class="kpi-grid">
-      <div class="kpi-card">
-        <span class="kpi-label">Total Workflow Tickets</span>
-        <div class="kpi-value" id="kpi-total-tickets">10,000</div>
-        <span class="kpi-trend">Simulated Jira/ServiceNow Records</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-label">Enterprise Breach Rate</span>
-        <div class="kpi-value text-warning" id="kpi-breach-rate">28.1%</div>
-        <span class="kpi-trend" id="kpi-breached-transitions">6,560 Transitions Delayed</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-label">Enterprise Delay Hours</span>
-        <div class="kpi-value text-danger" id="kpi-delay-hours">105,138 hrs</div>
-        <span class="kpi-trend">Historical 90-Day Accumulation</span>
-      </div>
-      <div class="kpi-card highlight-card">
-        <span class="kpi-label">Weekly Financial Leakage</span>
-        <div class="kpi-value text-leakage" id="kpi-weekly-leakage">$1.30M</div>
-        <span class="kpi-trend" id="kpi-inr-benchmark">Benchmark: ₹800 Lakh/week</span>
-      </div>
-    </section>
+  <!-- Navigation Tab Bar -->
+  <nav class="sub-nav" aria-label="Dashboard sections">
+    <div class="tab-list" role="tablist">
+      <button role="tab" aria-selected="true" class="tab-btn active" data-tab="tab-overview" id="tab-btn-overview">
+        Executive Overview
+      </button>
+      <button role="tab" aria-selected="false" class="tab-btn" data-tab="tab-simulator" id="tab-btn-simulator">
+        Financial Impact Simulator
+      </button>
+      <button role="tab" aria-selected="false" class="tab-btn" data-tab="tab-automation" id="tab-btn-automation">
+        Process Simplification RFCs
+      </button>
+      <button role="tab" aria-selected="false" class="tab-btn" data-tab="tab-matrix" id="tab-btn-matrix">
+        Handoff Matrix & Window SQL
+      </button>
+    </div>
+    <div class="nav-extra">
+      <span class="active-dataset-meta" id="dataset-meta-badge">10,000 Tickets &bull; 90-Day Analysis</span>
+    </div>
+  </nav>
 
-    <!-- Top 3 Bottlenecks & Recommendations Section -->
-    <div class="dashboard-split">
-      <!-- Left Column: Top 3 Friction Points -->
-      <section class="panel panel-left">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Top 3 Inter-Departmental Bottlenecks</h2>
-            <p class="panel-subtitle">Responsible for ~80%+ of all workflow delays (Pareto Window Analysis)</p>
+  <main class="main-content">
+    <!-- TAB 1: EXECUTIVE OVERVIEW -->
+    <div role="tabpanel" class="tab-content active" id="tab-overview" aria-labelledby="tab-btn-overview">
+      <!-- Executive KPI Cards -->
+      <section class="kpi-grid" aria-label="Executive Key Performance Indicators">
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Tracked Workflow Tickets</span>
+            <span class="kpi-tag neutral">Jira/ServiceNow</span>
           </div>
-          <span class="badge badge-accent" id="pareto-badge">93.1% Total Delay Share</span>
+          <div class="kpi-metric" id="kpi-total-tickets">10,000</div>
+          <div class="kpi-detail">
+            <span class="detail-label">Handoff Transitions:</span>
+            <span class="detail-value" id="kpi-total-transitions">23,356</span>
+          </div>
         </div>
 
-        <div class="bottlenecks-list" id="bottlenecks-container">
-          <!-- Dynamically populated -->
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Enterprise Breach Rate</span>
+            <span class="kpi-tag alert" id="kpi-breach-tag">SLA At Risk</span>
+          </div>
+          <div class="kpi-metric text-alert" id="kpi-breach-rate">28.09%</div>
+          <div class="kpi-detail">
+            <span class="detail-label">Breached Transitions:</span>
+            <span class="detail-value" id="kpi-breached-count">6,560</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Enterprise Delay</span>
+            <span class="kpi-tag neutral">Cumulative</span>
+          </div>
+          <div class="kpi-metric" id="kpi-total-delay">105,138 hrs</div>
+          <div class="kpi-detail">
+            <span class="detail-label">Mean Transition Time:</span>
+            <span class="detail-value" id="kpi-avg-duration">16.7 hrs</span>
+          </div>
+        </div>
+
+        <div class="kpi-card highlight-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Estimated Weekly Leakage</span>
+            <span class="kpi-tag danger">Financial Loss</span>
+          </div>
+          <div class="kpi-metric text-danger" id="kpi-weekly-leakage">$1.30M / wk</div>
+          <div class="kpi-detail">
+            <span class="detail-label">INR Benchmark:</span>
+            <span class="detail-value" id="kpi-inr-benchmark">800.71 Lakh / week</span>
+          </div>
         </div>
       </section>
 
-      <!-- Right Column: Algorithmic Recommendations -->
-      <section class="panel panel-right">
-        <div class="panel-header">
+      <!-- Bottleneck Analysis Section -->
+      <div class="split-view">
+        <!-- Top 3 Friction Handoffs -->
+        <section class="card-section flex-2" aria-labelledby="bottlenecks-heading">
+          <div class="section-header">
+            <div>
+              <h2 id="bottlenecks-heading" class="section-title">Critical Bottleneck Corridors</h2>
+              <p class="section-subtitle">Identified via SQL window functions (SUM OVER & DENSE_RANK). Top 3 generate &gt;80% of enterprise delays.</p>
+            </div>
+            <span class="metric-pill" id="pareto-summary-pill">93.08% Combined Delay</span>
+          </div>
+
+          <div class="corridor-cards" id="top-bottlenecks-list">
+            <!-- Dynamically generated via app.js -->
+          </div>
+        </section>
+
+        <!-- Executive Summary & Action Box -->
+        <section class="card-section flex-1" aria-labelledby="insights-heading">
+          <div class="section-header">
+            <h2 id="insights-heading" class="section-title">Operational Friction Diagnostics</h2>
+          </div>
+
+          <div class="diagnostics-box">
+            <div class="diagnostic-item">
+              <div class="diag-header">
+                <span class="diag-num">01</span>
+                <span class="diag-title">Pareto Delay Concentration</span>
+              </div>
+              <p class="diag-text">
+                Enterprise workflow friction is heavily clustered. Just <strong>3 out of 10 departmental corridors</strong> generate <strong>93.08%</strong> of all SLA delay hours across Operations, Category, and Supply Chain.
+              </p>
+            </div>
+
+            <div class="diagnostic-item">
+              <div class="diag-header">
+                <span class="diag-num">02</span>
+                <span class="diag-title">Cascading Cross-Functional Impact</span>
+              </div>
+              <p class="diag-text">
+                Windowed <code>LAG</code> analysis shows that Category delay at vendor ingestion cascades directly into Supply Chain inbound receiving, driving warehouse dock congestion.
+              </p>
+            </div>
+
+            <div class="diagnostic-item">
+              <div class="diag-header">
+                <span class="diag-num">03</span>
+                <span class="diag-title">Immediate Reclamation Target</span>
+              </div>
+              <p class="diag-text">
+                Automating Supply Chain approvals is projected to reclaim <strong>120 operational hours weekly</strong>, yielding direct operational savings of <strong>₹11.75 Lakh/week ($19.1k/week)</strong>.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- TAB 2: FINANCIAL IMPACT SIMULATOR -->
+    <div role="tabpanel" class="tab-content" id="tab-simulator" aria-labelledby="tab-btn-simulator" hidden>
+      <section class="card-section" aria-labelledby="simulator-heading">
+        <div class="section-header">
           <div>
-            <h2 class="panel-title">Data-Backed Automation Proposals</h2>
-            <p class="panel-subtitle">Algorithmic process simplification & operational hour reclamation</p>
+            <h2 id="simulator-heading" class="section-title">Algorithmic Financial Leakage Calculator</h2>
+            <p class="section-subtitle">Adjust commercial and operational variables to quantify estimated GMV loss and operational burn.</p>
+          </div>
+          <div class="currency-selector">
+            <label for="currency-select" class="currency-label">Currency Unit:</label>
+            <select id="currency-select" class="form-select">
+              <option value="USD" selected>USD ($ - International)</option>
+              <option value="INR">INR (₹ - Lakhs / Crores)</option>
+              <option value="EUR">EUR (€ - European)</option>
+            </select>
           </div>
         </div>
 
-        <div class="recommendations-list" id="recommendations-container">
-          <!-- Dynamically populated -->
+        <div class="simulator-layout">
+          <!-- Controls Column -->
+          <div class="sim-controls-panel">
+            <h3 class="controls-heading">Top-Down Commercial Inputs</h3>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="slider-aov">Average Order Value (AOV)</label>
+                <div class="input-number-wrap">
+                  <span class="currency-prefix" id="currency-sym-1">$</span>
+                  <input type="number" id="num-aov" class="form-input-number" min="1" max="100000" value="45">
+                </div>
+              </div>
+              <input type="range" id="slider-aov" class="form-range" min="10" max="250" step="5" value="45">
+              <div class="range-bounds">
+                <span id="aov-bound-min">$10</span>
+                <span id="aov-bound-max">$250</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="slider-daily-tx">Daily Transaction Volume</label>
+                <input type="number" id="num-daily-tx" class="form-input-number" min="500" max="100000" step="500" value="10000">
+              </div>
+              <input type="range" id="slider-daily-tx" class="form-range" min="1000" max="50000" step="1000" value="10000">
+              <div class="range-bounds">
+                <span>1,000 / day</span>
+                <span>50,000 / day</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="slider-rev-drop">Revenue Drop / Delay Hour</label>
+                <div class="input-number-wrap">
+                  <input type="number" id="num-rev-drop" class="form-input-number" min="0.05" max="3.0" step="0.05" value="0.5">
+                  <span class="unit-suffix">%</span>
+                </div>
+              </div>
+              <input type="range" id="slider-rev-drop" class="form-range" min="0.1" max="2.0" step="0.05" value="0.5">
+              <div class="range-bounds">
+                <span>0.10%</span>
+                <span>2.00%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="slider-ops-cost">Ops Overhead / Delay Hour</label>
+                <div class="input-number-wrap">
+                  <span class="currency-prefix" id="currency-sym-2">$</span>
+                  <input type="number" id="num-ops-cost" class="form-input-number" min="10" max="1000" step="5" value="65">
+                </div>
+              </div>
+              <input type="range" id="slider-ops-cost" class="form-range" min="20" max="200" step="5" value="65">
+              <div class="range-bounds">
+                <span id="ops-bound-min">$20/hr</span>
+                <span id="ops-bound-max">$200/hr</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Impact Output Breakdown Column -->
+          <div class="sim-output-panel">
+            <h3 class="controls-heading">Quantified Business Impact</h3>
+
+            <div class="output-highlight-card">
+              <div class="out-item-top">
+                <span class="out-label">Estimated Weekly Financial Leakage</span>
+                <span class="out-badge">Consolidated</span>
+              </div>
+              <div class="out-main-val" id="sim-out-weekly-total">$1,298,168</div>
+              <div class="out-sub-val" id="sim-out-inr-benchmark">Equivalent: 800.71 Lakh / week</div>
+            </div>
+
+            <div class="output-subgrid">
+              <div class="out-subcard">
+                <span class="out-sublabel">Weekly GMV at Risk</span>
+                <span class="out-subval" id="sim-out-weekly-gmv">$766,634</span>
+                <span class="out-submeta">Due to order fulfillment delay</span>
+              </div>
+              <div class="out-subcard">
+                <span class="out-sublabel">Weekly Ops Overhead</span>
+                <span class="out-subval" id="sim-out-weekly-ops">$531,533</span>
+                <span class="out-submeta">Idle capacity, expediting & triage</span>
+              </div>
+            </div>
+
+            <h4 class="scenario-heading">Sensitivity Scenario Modeling</h4>
+            <div class="scenario-table-wrap">
+              <table class="scenario-table">
+                <thead>
+                  <tr>
+                    <th>Scenario</th>
+                    <th>Hourly Drop</th>
+                    <th>Weekly Leakage</th>
+                    <th>90-Day Accumulation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="scenario-name">Conservative</span></td>
+                    <td>0.25% / hr</td>
+                    <td id="sc-val-cons-weekly">$914.8k</td>
+                    <td id="sc-val-cons-total">$11.76M</td>
+                  </tr>
+                  <tr class="highlight-row">
+                    <td><span class="scenario-name current">Baseline Model</span></td>
+                    <td>0.50% / hr</td>
+                    <td id="sc-val-base-weekly" class="bold-cell">$1.30M</td>
+                    <td id="sc-val-base-total" class="bold-cell">$16.69M</td>
+                  </tr>
+                  <tr>
+                    <td><span class="scenario-name">Aggressive (High Friction)</span></td>
+                    <td>0.75% / hr</td>
+                    <td id="sc-val-aggr-weekly">$1.68M</td>
+                    <td id="sc-val-aggr-total">$21.62M</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
     </div>
 
-    <!-- Interactive Simulation Calculator -->
-    <section class="panel sim-panel">
-      <div class="panel-header">
-        <div>
-          <h2 class="panel-title">The Guesstimate Simulation Engine</h2>
-          <p class="panel-subtitle">Adjust top-down business variables to quantify revenue leakage and GMV at risk</p>
-        </div>
-        <div class="currency-toggle">
-          <label>Currency:</label>
-          <select id="sim-currency" class="select-control">
-            <option value="USD" selected>USD ($)</option>
-            <option value="INR">INR (₹ - Lakhs)</option>
-            <option value="EUR">EUR (€)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="sim-grid">
-        <div class="sim-controls">
-          <div class="control-group">
-            <div class="control-label-row">
-              <label for="input-aov">Average Order Value (AOV)</label>
-              <span class="control-value-display" id="val-aov">$45.00</span>
-            </div>
-            <input type="range" id="input-aov" min="10" max="250" step="5" value="45">
-          </div>
-
-          <div class="control-group">
-            <div class="control-label-row">
-              <label for="input-daily-tx">Daily Transactions</label>
-              <span class="control-value-display" id="val-daily-tx">10,000</span>
-            </div>
-            <input type="range" id="input-daily-tx" min="1000" max="50000" step="1000" value="10000">
-          </div>
-
-          <div class="control-group">
-            <div class="control-label-row">
-              <label for="input-rev-drop">Revenue Drop / Hour Delayed</label>
-              <span class="control-value-display" id="val-rev-drop">0.50%</span>
-            </div>
-            <input type="range" id="input-rev-drop" min="0.1" max="2.0" step="0.05" value="0.5">
-          </div>
-
-          <div class="control-group">
-            <div class="control-label-row">
-              <label for="input-ops-cost">Ops Cost / Delay Hour</label>
-              <span class="control-value-display" id="val-ops-cost">$65.00</span>
-            </div>
-            <input type="range" id="input-ops-cost" min="20" max="200" step="5" value="65">
+    <!-- TAB 3: PROCESS SIMPLIFICATION RFCS -->
+    <div role="tabpanel" class="tab-content" id="tab-automation" aria-labelledby="tab-btn-automation" hidden>
+      <section class="card-section" aria-labelledby="rfcs-heading">
+        <div class="section-header">
+          <div>
+            <h2 id="rfcs-heading" class="section-title">Data-Backed Process Simplification Proposals</h2>
+            <p class="section-subtitle">Algorithmic workflow recommendations prioritized by operational hours reclaimed and financial ROI.</p>
           </div>
         </div>
 
-        <div class="sim-results">
-          <h3 class="sim-results-title">Quantified Financial Impact</h3>
-          <div class="results-stat-box">
-            <div class="res-stat-item">
-              <span class="res-label">Weekly GMV Leaked:</span>
-              <span class="res-val" id="res-weekly-gmv">$762.3k</span>
-            </div>
-            <div class="res-stat-item">
-              <span class="res-label">Weekly Ops Overhead:</span>
-              <span class="res-val" id="res-weekly-ops">$531.5k</span>
-            </div>
-            <div class="res-stat-item total-item">
-              <span class="res-label">Total Weekly Leakage:</span>
-              <span class="res-val text-leakage" id="res-weekly-total">$1.30M</span>
-            </div>
-          </div>
+        <div class="rfcs-grid" id="rfcs-container">
+          <!-- Populated dynamically via app.js -->
+        </div>
+      </section>
+    </div>
 
-          <div class="scenarios-row">
-            <div class="scenario-pill">
-              <span class="sc-title">Conservative</span>
-              <span class="sc-val" id="sc-conservative">$880k/wk</span>
-            </div>
-            <div class="scenario-pill active">
-              <span class="sc-title">Baseline</span>
-              <span class="sc-val" id="sc-baseline">$1.30M/wk</span>
-            </div>
-            <div class="scenario-pill">
-              <span class="sc-title">Aggressive</span>
-              <span class="sc-val" id="sc-aggressive">$1.72M/wk</span>
-            </div>
+    <!-- TAB 4: HANDOFF MATRIX & WINDOW SQL -->
+    <div role="tabpanel" class="tab-content" id="tab-matrix" aria-labelledby="tab-btn-matrix" hidden>
+      <section class="card-section" aria-labelledby="matrix-heading">
+        <div class="section-header table-actions-bar">
+          <div>
+            <h2 id="matrix-heading" class="section-title">Inter-Departmental Handoff Corridor Matrix</h2>
+            <p class="section-subtitle">Full tabular audit of all departmental transitions, breach frequencies, and delay volumes.</p>
+          </div>
+          <div class="table-filter-group">
+            <input type="search" id="corridor-search" class="form-search" placeholder="Filter by department (e.g. SCM, CAT, OPS)..." aria-label="Filter corridors table">
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Granular Department Friction Table -->
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <h2 class="panel-title">All Inter-Departmental Handoff Corridors</h2>
-          <p class="panel-subtitle">Comprehensive SQL Transition Durations & Breach Percentages</p>
+        <!-- Accessible Responsive Table Container per Modern Web Guidance -->
+        <div tabindex="0" role="region" aria-labelledby="matrix-heading" class="table-wrapper">
+          <table class="enterprise-table" id="table-corridors">
+            <thead>
+              <tr>
+                <th scope="col">Corridor</th>
+                <th scope="col">From Department</th>
+                <th scope="col">To Department</th>
+                <th scope="col" class="num-col">Total Volume</th>
+                <th scope="col" class="num-col">Avg Duration</th>
+                <th scope="col" class="num-col">SLA Target</th>
+                <th scope="col" class="num-col">Breach Rate</th>
+                <th scope="col" class="num-col">Delay Hours</th>
+                <th scope="col" class="num-col">Blocker Incidents</th>
+              </tr>
+            </thead>
+            <tbody id="corridors-table-body">
+              <!-- Populated dynamically via app.js -->
+            </tbody>
+          </table>
         </div>
-      </div>
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Handoff Corridor</th>
-              <th>Volume</th>
-              <th>Avg Duration</th>
-              <th>SLA Target</th>
-              <th>Breach Rate</th>
-              <th>Total Delay Hours</th>
-              <th>Blockers</th>
-            </tr>
-          </thead>
-          <tbody id="table-corridors-body">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </section>
+      </section>
+
+      <!-- Advanced SQL Window Query Inspector -->
+      <section class="card-section sql-inspector" aria-labelledby="sql-heading">
+        <div class="section-header">
+          <div>
+            <h3 id="sql-heading" class="section-title">Underlying SQL Window Function Query</h3>
+            <p class="section-subtitle">Advanced query utilizing <code>LAG()</code>, <code>LEAD()</code>, and windowed cumulative sums for bottleneck detection.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" id="btn-copy-sql">Copy SQL</button>
+        </div>
+        <pre class="code-block"><code id="sql-code-display">-- Enterprise Bottleneck Window Analytics (PostgreSQL &amp; SQLite compatible)
+WITH TransitionSummary AS (
+    SELECT 
+        d_from.code || ' -> ' || d_to.code AS handoff_corridor,
+        d_from.name AS from_department_name,
+        d_to.name AS to_department_name,
+        COUNT(*) AS total_volume,
+        SUM(CASE WHEN wt.is_breached = 1 THEN 1 ELSE 0 END) AS breach_volume,
+        ROUND(AVG(wt.duration_hours), 2) AS avg_duration_hours,
+        ROUND(AVG(wt.sla_target_hours), 2) AS sla_target_hours,
+        ROUND(SUM(wt.breach_hours), 2) AS corridor_breach_hours,
+        SUM(CASE WHEN wt.is_blocked = 1 THEN 1 ELSE 0 END) AS blocker_count
+    FROM workflow_transitions wt
+    JOIN departments d_from ON wt.from_department_id = d_from.id
+    JOIN departments d_to ON wt.to_department_id = d_to.id
+    GROUP BY d_from.code, d_from.name, d_to.code, d_to.name
+),
+CorridorRankings AS (
+    SELECT 
+        handoff_corridor,
+        from_department_name,
+        to_department_name,
+        total_volume,
+        breach_volume,
+        avg_duration_hours,
+        sla_target_hours,
+        corridor_breach_hours,
+        blocker_count,
+        ROUND(100.0 * breach_volume / total_volume, 2) AS breach_rate_pct,
+        SUM(corridor_breach_hours) OVER () AS total_enterprise_delay_hours,
+        ROUND(100.0 * corridor_breach_hours / SUM(corridor_breach_hours) OVER (), 2) AS delay_share_pct,
+        ROUND(
+            100.0 * SUM(corridor_breach_hours) OVER (
+                ORDER BY corridor_breach_hours DESC 
+                ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+            ) / SUM(corridor_breach_hours) OVER (),
+            2
+        ) AS cumulative_delay_pct,
+        DENSE_RANK() OVER (ORDER BY corridor_breach_hours DESC) AS bottleneck_rank
+    FROM TransitionSummary
+)
+SELECT * FROM CorridorRankings WHERE bottleneck_rank &lt;= 3;</code></pre>
+      </section>
+    </div>
   </main>
 
-  <footer class="footer">
-    <p>WorkflowSLA: Cross-Functional Operations & Blockage Tracker &bull; Powered by FastAPI & SQLite/PostgreSQL</p>
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <strong>WorkflowSLA</strong> &bull; Cross-Functional Operations &amp; Blockage Tracker
+      </div>
+      <div class="footer-right">
+        Relational Analytics Engine (PostgreSQL / SQLite) &bull; FastAPI Backend
+      </div>
+    </div>
   </footer>
 
   <script src="/static/app.js"></script>
 </body>
 </html>
-
