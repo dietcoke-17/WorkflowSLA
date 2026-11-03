@@ -211,3 +211,4 @@ window.addEventListener("DOMContentLoaded", () => {
   fetchBottlenecks();
   fetchFrictionCorridors();
 });
+

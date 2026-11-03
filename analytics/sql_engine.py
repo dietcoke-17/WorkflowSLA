@@ -291,3 +291,4 @@ class SQLAnalyticsEngine:
         """
         rows = self.execute_query(sql)
         return rows[0] if rows else {}
+

@@ -36,3 +36,4 @@ def test_ticket_and_transition_counts():
         trans_count = db.query(WorkflowTransition).count()
         assert ticket_count >= 10000, f"Expected >= 10,000 tickets, found {ticket_count}"
         assert trans_count >= 20000, f"Expected >= 20,000 transitions, found {trans_count}"
+

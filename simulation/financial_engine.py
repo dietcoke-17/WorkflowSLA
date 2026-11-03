@@ -267,3 +267,4 @@ class FinancialSimulationEngine:
                 f"preventing substantial weekly revenue leakage."
             )
         }
+

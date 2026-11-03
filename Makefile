@@ -35,3 +35,4 @@ docker-down:
 clean:
 	rm -f workflowsla.db *.sqlite3
 	find . -type d -name "__pycache__" -exec rm -rf {} +
+

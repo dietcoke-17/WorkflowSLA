@@ -103,3 +103,4 @@ CREATE INDEX idx_transitions_ticket ON workflow_transitions(ticket_id);
 CREATE INDEX idx_transitions_from_to ON workflow_transitions(from_department_id, to_department_id);
 CREATE INDEX idx_transitions_dates ON workflow_transitions(transitioned_at, completed_at);
 CREATE INDEX idx_transitions_breach ON workflow_transitions(is_breached);
+

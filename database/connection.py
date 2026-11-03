@@ -69,3 +69,4 @@ def init_db():
     """Initializes all registered models into the database."""
     from database import models  # noqa: F401
     Base.metadata.create_all(bind=engine)
+

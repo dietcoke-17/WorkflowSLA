@@ -234,3 +234,4 @@ class WorkflowTransition(Base):
             "blocker_reason": self.blocker_reason,
             "blocked_duration_hours": self.blocked_duration_hours
         }
+

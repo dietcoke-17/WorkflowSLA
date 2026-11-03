@@ -56,3 +56,4 @@ def test_format_currency():
     """Verify currency formatting in USD and INR Lakhs."""
     assert "$" in format_currency(1500000, "USD")
     assert "Lakh" in format_currency(1200000, "INR")
+

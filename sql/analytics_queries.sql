@@ -201,3 +201,4 @@ JOIN initiatives i ON t.initiative_id = i.id
 JOIN departments d ON i.owner_department_id = d.id
 GROUP BY i.initiative_type, d.name, d.code
 ORDER BY total_breach_hours DESC;
+

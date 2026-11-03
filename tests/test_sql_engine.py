@@ -63,3 +63,4 @@ def test_sla_breach_rates_by_initiative(engine):
     assert "initiative_type" in first
     assert "breach_rate_pct" in first
     assert "total_breach_hours" in first
+

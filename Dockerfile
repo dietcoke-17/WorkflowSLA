@@ -25,3 +25,4 @@ EXPOSE 8000
 
 # Run main server
 CMD ["python3", "main.py"]
+

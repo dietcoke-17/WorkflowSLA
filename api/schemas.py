@@ -71,3 +71,4 @@ class BottleneckAnalysisResponse(BaseModel):
     data_backed_recommendations: List[ProcessRecommendation]
     executive_summary: str
     enterprise_summary: Dict[str, Any]
+
