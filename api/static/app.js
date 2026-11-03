@@ -74,7 +74,7 @@ const dom = {
 
 /** Aceternity Mouse Spotlight Effect */
 function initAceternitySpotlight() {
-  document.querySelectorAll(".bento-card, .corridor-glass-card, .rfc-bento-card").forEach(card => {
+  document.querySelectorAll(".bento-tile, .corridor-glass-card, .rfc-bento-card").forEach(card => {
     card.addEventListener("mousemove", e => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
