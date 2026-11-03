@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: workflowsla_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: workflowsla
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init_schema_postgres.sql:/docker-entrypoint-initdb.d/init_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d workflowsla"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: workflowsla_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/workflowsla
+      - HOST=0.0.0.0
+      - PORT=8000
+      - ENVIRONMENT=production
+      - DEFAULT_AVERAGE_ORDER_VALUE=45.0
+      - DEFAULT_DAILY_TRANSACTIONS=10000
+      - DEFAULT_REVENUE_DROP_PER_HOUR=0.005
+      - DEFAULT_OPERATIONAL_COST_PER_HOUR=65.0
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python3 main.py --seed 10000 && python3 main.py"
+
+volumes:
+  pgdata:
