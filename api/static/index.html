@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark light">
+  <meta name="color-scheme" content="dark">
   <title>WorkflowSLA &bull; Cross-Functional Operations &amp; Blockage Tracker</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body class="aceternity-theme">
   <!-- Aceternity Ambient Background Dot Grid & Spotlight -->
@@ -18,17 +18,33 @@
   <!-- Header Navigation -->
   <header class="app-header-wrap">
     <div class="app-header">
-      <!-- Better Logo (as requested by user) -->
+      <!-- High-End Aceternity Logo -->
       <div class="brand-logo-container">
-        <div class="brand-badge-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        <div class="brand-logo-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="url(#logo-grad-1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="url(#logo-grad-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="url(#logo-grad-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="logo-grad-1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#818cf8"/>
+                <stop offset="1" stop-color="#c084fc"/>
+              </linearGradient>
+              <linearGradient id="logo-grad-2" x1="2" y1="17" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a855f7"/>
+                <stop offset="1" stop-color="#ec4899"/>
+              </linearGradient>
+              <linearGradient id="logo-grad-3" x1="2" y1="12" x2="22" y2="17" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6366f1"/>
+                <stop offset="1" stop-color="#a855f7"/>
+              </linearGradient>
+            </defs>
           </svg>
         </div>
         <div class="brand-title-wrap">
           <div class="brand-title-row">
             <span class="brand-title">Workflow<span class="brand-highlight">SLA</span></span>
-            <span class="brand-tag">v2.4 Enterprise</span>
+            <span class="brand-pill">Enterprise</span>
           </div>
           <span class="brand-subtitle">Cross-Functional Operations &amp; Blockage Tracker</span>
         </div>
@@ -73,9 +89,8 @@
 
       <!-- Action Items -->
       <div class="header-action-group">
-        <div class="live-status-pill">
-          <span class="live-pulse"></span>
-          <span class="status-label">PostgreSQL / SQLite</span>
+        <div class="engine-badge">
+          <span>PostgreSQL &bull; SQLite</span>
         </div>
 
         <button id="btn-refresh" class="btn-subtle" title="Refresh metrics">
@@ -103,7 +118,7 @@
     <!-- Sub-header Meta Bar -->
     <div class="dashboard-meta-bar">
       <div class="meta-left">
-        <span class="meta-tag">Production Workflow Audit</span>
+        <span class="meta-tag">Operations Bottleneck Audit</span>
         <span class="meta-sep">&bull;</span>
         <span class="meta-desc">Tracking cross-functional handoffs across Operations, Category, and Supply Chain</span>
       </div>
@@ -121,8 +136,8 @@
           <div class="bento-spotlight"></div>
           <div class="bento-inner">
             <div class="bento-top-row">
-              <span class="bento-badge danger">Financial Leakage</span>
-              <span class="bento-sublabel">Quantified Impact</span>
+              <span class="badge-subtle badge-rose">Financial Leakage</span>
+              <span class="bento-sublabel">Quantified Weekly Loss</span>
             </div>
             <div class="bento-metric-row">
               <span class="bento-hero-number text-rose" id="kpi-weekly-leakage">$1.30M</span>
@@ -151,7 +166,7 @@
           <div class="bento-spotlight"></div>
           <div class="bento-inner">
             <div class="bento-top-row">
-              <span class="bento-badge warning">SLA Breach Rate</span>
+              <span class="badge-subtle badge-amber">SLA Breach Rate</span>
               <span class="bento-sublabel">Threshold Risk</span>
             </div>
             <div class="bento-metric-row">
@@ -171,7 +186,7 @@
           <div class="bento-spotlight"></div>
           <div class="bento-inner">
             <div class="bento-top-row">
-              <span class="bento-badge indigo">Enterprise Delay</span>
+              <span class="badge-subtle badge-indigo">Enterprise Delay</span>
               <span class="bento-sublabel">90-Day Scope</span>
             </div>
             <div class="bento-metric-row">
@@ -217,8 +232,8 @@
         <section class="dashboard-panel flex-3" aria-labelledby="corridors-title">
           <div class="panel-header-bar">
             <div>
-              <h2 id="corridors-title" class="panel-title-text">Top 3 Critical Bottleneck Corridors</h2>
-              <p class="panel-subtitle-text">Pinpointed via windowed <code>SUM() OVER ()</code> and <code>DENSE_RANK()</code>. These 3 corridors account for 93% of all delays.</p>
+              <h2 id="corridors-title" class="panel-title-text">Critical Bottleneck Corridors</h2>
+              <p class="panel-subtitle-text">Pinpointed via windowed ranking algorithms. These 3 corridors account for 93% of all organizational delay.</p>
             </div>
           </div>
 
@@ -249,7 +264,7 @@
               <div class="diag-body">
                 <h3 class="diag-heading">Downstream Cascading Delays</h3>
                 <p class="diag-desc">
-                  Advanced <code>LAG()</code> window queries show that Category vendor ingestion stalls cascade directly into Supply Chain inbound receiving, driving warehouse dock congestion.
+                  Window analysis reveals Category vendor ingestion stalls cascade directly into Supply Chain inbound receiving, driving warehouse dock congestion.
                 </p>
               </div>
             </div>
@@ -273,8 +288,8 @@
       <section class="dashboard-panel" aria-labelledby="sim-title">
         <div class="panel-header-bar flex-between">
           <div>
-            <h2 id="sim-title" class="panel-title-text">The Guesstimate Simulation Engine</h2>
-            <p class="panel-subtitle-text">Model top-down commercial and operational variables to quantify estimated GMV loss and operational burn.</p>
+            <h2 id="sim-title" class="panel-title-text">Financial Impact Simulator</h2>
+            <p class="panel-subtitle-text">Model commercial and operational variables to quantify estimated GMV loss and operational burn.</p>
           </div>
           <div class="currency-toggle-box">
             <label for="currency-select" class="currency-text">Currency Unit:</label>
@@ -354,17 +369,17 @@
 
           <!-- Impact Projections -->
           <div class="sim-card sim-outputs">
-            <h3 class="sim-subheading">Quantified Business Impact</h3>
+            <h3 class="sim-subheading">Calculated Financial Impact</h3>
 
             <div class="hero-callout-glow">
-              <span class="callout-tag">Weekly Revenue Leakage</span>
+              <span class="callout-tag">Projected Weekly Revenue Leakage</span>
               <div class="callout-metric text-rose" id="sim-out-weekly-total">$1,298,168</div>
               <div class="callout-benchmark" id="sim-out-inr-benchmark">Equivalent: 800.71 Lakh / week</div>
             </div>
 
             <div class="output-split-chips">
               <div class="output-chip">
-                <span class="chip-label">Weekly GMV Leaked</span>
+                <span class="chip-label">Weekly GMV at Risk</span>
                 <span class="chip-value text-rose" id="sim-out-weekly-gmv">$766,634</span>
                 <span class="chip-subtext">Order fulfillment drop</span>
               </div>
@@ -381,7 +396,7 @@
                 <thead>
                   <tr>
                     <th>Scenario</th>
-                    <th>Sensitivity</th>
+                    <th>Sensitivity Rate</th>
                     <th class="num-col">Weekly Leakage</th>
                     <th class="num-col">90-Day Total</th>
                   </tr>
@@ -418,7 +433,7 @@
       <section class="dashboard-panel" aria-labelledby="rfcs-title">
         <div class="panel-header-bar">
           <div>
-            <h2 id="rfcs-title" class="panel-title-text">Process Simplification RFC Playbook</h2>
+            <h2 id="rfcs-title" class="panel-title-text">Process Simplification Playbook</h2>
             <p class="panel-subtitle-text">Data-backed automation proposals ranked by operational hours reclaimed and quantified weekly ROI.</p>
           </div>
         </div>
@@ -429,13 +444,13 @@
       </section>
     </div>
 
-    <!-- TAB 4: CORRIDOR MATRIX & SQL -->
+    <!-- TAB 4: CORRIDOR MATRIX -->
     <div role="tabpanel" class="tab-pane" id="tab-matrix" aria-labelledby="tab-btn-matrix" hidden>
       <section class="dashboard-panel" aria-labelledby="matrix-title">
         <div class="panel-header-bar flex-between">
           <div>
             <h2 id="matrix-title" class="panel-title-text">Inter-Departmental Handoff Corridor Matrix</h2>
-            <p class="panel-subtitle-text">Complete tabular audit of all departmental transitions, breach frequencies, and delay volumes.</p>
+            <p class="panel-subtitle-text">Tabular audit of all departmental transitions, breach frequencies, and delay volumes.</p>
           </div>
           <div class="search-input-wrap">
             <svg class="search-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -467,61 +482,6 @@
             </tbody>
           </table>
         </div>
-      </section>
-
-      <!-- Advanced SQL Window Query Inspector -->
-      <section class="dashboard-panel sql-panel" aria-labelledby="sql-title">
-        <div class="panel-header-bar flex-between">
-          <div>
-            <h3 id="sql-title" class="panel-title-text font-sm">Underlying Window Function SQL Query</h3>
-            <p class="panel-subtitle-text">PostgreSQL &amp; SQLite compatible query utilizing <code>LAG()</code>, <code>LEAD()</code>, and windowed running totals.</p>
-          </div>
-          <button class="btn-subtle" id="btn-copy-sql">
-            <span>Copy SQL</span>
-          </button>
-        </div>
-        <pre class="sql-code-box"><code id="sql-code-display">-- Enterprise Bottleneck Window Analytics (PostgreSQL &amp; SQLite compatible)
-WITH TransitionSummary AS (
-    SELECT 
-        d_from.code || ' -> ' || d_to.code AS handoff_corridor,
-        d_from.name AS from_department_name,
-        d_to.name AS to_department_name,
-        COUNT(*) AS total_volume,
-        SUM(CASE WHEN wt.is_breached = 1 THEN 1 ELSE 0 END) AS breach_volume,
-        ROUND(AVG(wt.duration_hours), 2) AS avg_duration_hours,
-        ROUND(AVG(wt.sla_target_hours), 2) AS sla_target_hours,
-        ROUND(SUM(wt.breach_hours), 2) AS corridor_breach_hours,
-        SUM(CASE WHEN wt.is_blocked = 1 THEN 1 ELSE 0 END) AS blocker_count
-    FROM workflow_transitions wt
-    JOIN departments d_from ON wt.from_department_id = d_from.id
-    JOIN departments d_to ON wt.to_department_id = d_to.id
-    GROUP BY d_from.code, d_from.name, d_to.code, d_to.name
-),
-CorridorRankings AS (
-    SELECT 
-        handoff_corridor,
-        from_department_name,
-        to_department_name,
-        total_volume,
-        breach_volume,
-        avg_duration_hours,
-        sla_target_hours,
-        corridor_breach_hours,
-        blocker_count,
-        ROUND(100.0 * breach_volume / total_volume, 2) AS breach_rate_pct,
-        SUM(corridor_breach_hours) OVER () AS total_enterprise_delay_hours,
-        ROUND(100.0 * corridor_breach_hours / SUM(corridor_breach_hours) OVER (), 2) AS delay_share_pct,
-        ROUND(
-            100.0 * SUM(corridor_breach_hours) OVER (
-                ORDER BY corridor_breach_hours DESC 
-                ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-            ) / SUM(corridor_breach_hours) OVER (),
-            2
-        ) AS cumulative_delay_pct,
-        DENSE_RANK() OVER (ORDER BY corridor_breach_hours DESC) AS bottleneck_rank
-    FROM TransitionSummary
-)
-SELECT * FROM CorridorRankings WHERE bottleneck_rank &lt;= 3;</code></pre>
       </section>
     </div>
   </main>

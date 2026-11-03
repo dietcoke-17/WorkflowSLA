@@ -255,7 +255,8 @@ class FinancialSimulationEngine:
                 "weekly_financial_leakage": round(weekly_enterprise_financial_leakage, 2),
                 "formatted_total_leakage": format_currency(total_enterprise_financial_leakage, currency),
                 "formatted_weekly_leakage": format_currency(weekly_enterprise_financial_leakage, currency),
-                "inr_benchmark_weekly_leakage": f"{round(weekly_enterprise_delay_hours * ((inr_hourly_gmv * revenue_drop_per_hour_delayed + 2500.0) / 100000.0), 2)} Lakh/week"
+                "inr_benchmark_weekly_leakage": f"{round(weekly_enterprise_delay_hours * ((inr_hourly_gmv * revenue_drop_per_hour_delayed + 2500.0) / 100000.0), 2)} Lakh/week",
+                "sensitivity_scenarios": scenarios
             },
             "top_three_bottlenecks": [c for c in corridor_financial_breakdown if c["bottleneck_rank"] <= 3],
             "corridor_breakdown": corridor_financial_breakdown,
