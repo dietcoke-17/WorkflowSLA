@@ -3,262 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- MANDATORY per Modern Web Guidance: Declare support for both light and dark themes -->
-  <meta name="color-scheme" content="light dark">
-  <script>
-    // FOUC prevention script per Modern Web Guidance (dark-mode-toggle)
-    try {
-      const stored = localStorage.getItem("color-scheme");
-      if (stored) {
-        document.querySelector('meta[name="color-scheme"]').content = stored;
-      }
-    } catch (e) {}
-  </script>
+  <meta name="color-scheme" content="dark light">
   <title>WorkflowSLA &bull; Cross-Functional Operations &amp; Blockage Tracker</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <!-- Top SaaS Header Bar -->
-  <header class="app-navbar">
-    <div class="nav-left">
-      <div class="workspace-pill">
-        <div class="workspace-avatar">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+<body class="aceternity-theme">
+  <!-- Aceternity Ambient Background Elements -->
+  <div class="aceternity-bg-grid" aria-hidden="true"></div>
+  <div class="aceternity-spotlight" aria-hidden="true"></div>
+
+  <!-- Aceternity Floating Navbar -->
+  <header class="navbar-wrapper">
+    <nav class="floating-navbar">
+      <div class="nav-brand-group">
+        <div class="brand-badge-glow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
           </svg>
         </div>
-        <div class="workspace-meta">
-          <span class="workspace-name">WorkflowSLA</span>
-          <span class="workspace-env">Enterprise Cloud</span>
+        <div class="brand-text">
+          <span class="brand-title">Workflow<span class="gradient-text-accent">SLA</span></span>
+          <span class="brand-tag">v2.4 Enterprise</span>
         </div>
-        <span class="badge-env">Production</span>
-      </div>
-    </div>
-
-    <div class="nav-right">
-      <div class="live-pulse-indicator" title="Connected to PostgreSQL / SQLite Engine">
-        <span class="pulse-dot"></span>
-        <span class="pulse-label">Engine Active</span>
-        <span class="pulse-divider">&bull;</span>
-        <span class="sync-timestamp" id="last-sync-time">Synced just now</span>
       </div>
 
-      <div class="nav-buttons">
-        <!-- Theme Switcher Button -->
-        <button id="btn-theme-toggle" class="icon-btn" title="Toggle Light / Dark Mode" aria-label="Toggle theme">
-          <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
+      <!-- Segmented Tab Switcher (Floating Center) -->
+      <div class="floating-tabs" role="tablist" aria-label="Dashboard sections">
+        <button role="tab" aria-selected="true" class="tab-pill active" data-tab="tab-overview" id="tab-btn-overview">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          Overview
+        </button>
+        <button role="tab" aria-selected="false" class="tab-pill" data-tab="tab-simulator" id="tab-btn-simulator">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Simulator
+        </button>
+        <button role="tab" aria-selected="false" class="tab-pill" data-tab="tab-automation" id="tab-btn-automation">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          Automation RFCs
+        </button>
+        <button role="tab" aria-selected="false" class="tab-pill" data-tab="tab-matrix" id="tab-btn-matrix">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          Corridor Matrix
+        </button>
+      </div>
+
+      <!-- Action Group -->
+      <div class="nav-action-group">
+        <div class="pulse-status-badge">
+          <span class="live-ping"></span>
+          <span class="status-name">Live Analytics</span>
+        </div>
+
+        <button id="btn-refresh" class="aceternity-btn-subtle" title="Refresh data">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
         </button>
 
-        <!-- Refresh Button -->
-        <button id="btn-refresh" class="btn btn-secondary btn-icon" title="Refresh metrics">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
-          <span>Refresh</span>
+        <button id="btn-reseed" class="aceternity-btn-subtle" title="Reseed 10,000 synthetic workflow tickets">
+          Reseed 10k
         </button>
 
-        <!-- Reseed Button -->
-        <button id="btn-reseed" class="btn btn-secondary" title="Regenerate 10,000+ synthetic workflow tickets">
-          <span>Reseed 10k</span>
-        </button>
-
-        <!-- Swagger Docs Button -->
-        <a href="/docs" target="_blank" class="btn btn-primary" title="Open API Documentation">
-          <span>API Specs</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-          </svg>
+        <a href="/docs" target="_blank" class="shimmer-button" title="View OpenAPI / Swagger documentation">
+          <span class="shimmer-text">API Docs &rarr;</span>
         </a>
       </div>
-    </div>
+    </nav>
   </header>
 
-  <!-- Segmented Control Bar -->
-  <nav class="navigation-bar" aria-label="Main tabs">
-    <div class="nav-container">
-      <div class="segmented-control" role="tablist">
-        <button role="tab" aria-selected="true" class="seg-btn active" data-tab="tab-overview" id="tab-btn-overview">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="9"></rect>
-            <rect x="14" y="3" width="7" height="5"></rect>
-            <rect x="14" y="12" width="7" height="9"></rect>
-            <rect x="3" y="16" width="7" height="5"></rect>
-          </svg>
-          Executive Overview
-        </button>
-        <button role="tab" aria-selected="false" class="seg-btn" data-tab="tab-simulator" id="tab-btn-simulator">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="12" y1="1" x2="12" y2="23"></line>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-          </svg>
-          Financial Simulator
-        </button>
-        <button role="tab" aria-selected="false" class="seg-btn" data-tab="tab-automation" id="tab-btn-automation">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          Process RFCs
-        </button>
-        <button role="tab" aria-selected="false" class="seg-btn" data-tab="tab-matrix" id="tab-btn-matrix">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
-          Corridor Matrix &amp; SQL
-        </button>
+  <!-- Main Hero Viewport -->
+  <main class="page-body">
+    <!-- Header Hero Banner -->
+    <section class="hero-banner">
+      <div class="hero-pill-badge">
+        <span class="sparkle-icon">&#10022;</span>
+        <span>Cross-Functional Operations &amp; Blockage Tracker</span>
+        <span class="hero-divider">/</span>
+        <span class="hero-subtext">PostgreSQL 16 &bull; SQLite Window Engine</span>
       </div>
+      <h1 class="hero-main-title">
+        Identify Organizational Bottlenecks.<br>
+        <span class="gradient-text-hero">Quantify Financial SLA Leakage.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Tracking 10,000+ workflow tickets across Operations, Category, and Supply Chain.
+        Powered by SQL window functions (<code class="code-pill">LAG</code>, <code class="code-pill">LEAD</code>, <code class="code-pill">DENSE_RANK</code>) to eliminate cross-departmental friction.
+      </p>
+    </section>
 
-      <div class="dataset-meta-badge">
-        <span class="meta-label">Scope:</span>
-        <span class="meta-val">10,000 Tickets &bull; 90-Day Window</span>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main View Container -->
-  <main class="page-container">
     <!-- TAB 1: EXECUTIVE OVERVIEW -->
     <div role="tabpanel" class="tab-pane active" id="tab-overview" aria-labelledby="tab-btn-overview">
-      <!-- High-Level Metric Tiles -->
-      <section class="metrics-grid" aria-label="Key Performance Indicators">
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-title">Tracked Tickets</span>
-            <span class="metric-tag neutral">Jira/ServiceNow</span>
-          </div>
-          <div class="metric-value-row">
-            <span class="metric-value" id="kpi-total-tickets">10,000</span>
-          </div>
-          <div class="metric-footer">
-            <span class="foot-label">Handoff Transitions</span>
-            <span class="foot-val" id="kpi-total-transitions">23,356</span>
-          </div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-title">Enterprise Breach Rate</span>
-            <span class="metric-tag warning" id="kpi-breach-tag">At Risk</span>
-          </div>
-          <div class="metric-value-row">
-            <span class="metric-value text-amber" id="kpi-breach-rate">28.09%</span>
-          </div>
-          <div class="metric-footer">
-            <span class="foot-label">Breached Transitions</span>
-            <span class="foot-val text-amber" id="kpi-breached-count">6,560</span>
-          </div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-title">Enterprise Delay Volume</span>
-            <span class="metric-tag neutral">90-Day Accumulation</span>
-          </div>
-          <div class="metric-value-row">
-            <span class="metric-value" id="kpi-total-delay">105,138h</span>
-          </div>
-          <div class="metric-footer">
-            <span class="foot-label">Mean Transition Time</span>
-            <span class="foot-val" id="kpi-avg-duration">16.7h</span>
+      <!-- Aceternity Bento Grid -->
+      <section class="bento-grid" aria-label="Key metrics bento grid">
+        <!-- Bento Tile 1: Hero Financial Leakage (Spans 2 cols) -->
+        <div class="bento-card bento-hero bento-col-2">
+          <div class="bento-card-spotlight"></div>
+          <div class="bento-content">
+            <div class="bento-header">
+              <span class="bento-tag danger-tag">Financial Leakage</span>
+              <span class="bento-meta" id="sync-stamp">Updated just now</span>
+            </div>
+            <div class="bento-hero-metric">
+              <div class="bento-num text-gradient-rose" id="kpi-weekly-leakage">$1.30M</div>
+              <span class="bento-unit">/ week projected</span>
+            </div>
+            <div class="bento-submetric" id="kpi-inr-benchmark">
+              Benchmark equivalent: <strong class="text-rose">800.71 Lakh / week</strong>
+            </div>
+            <p class="bento-desc">
+              Direct operational loss and GMV order delay drop stemming from cross-functional handoff stalls.
+            </p>
+            <div class="bento-spark-bars">
+              <div class="spark-bar h-60"></div>
+              <div class="spark-bar h-80"></div>
+              <div class="spark-bar h-40"></div>
+              <div class="spark-bar h-95"></div>
+              <div class="spark-bar h-70"></div>
+              <div class="spark-bar h-85 danger-bar"></div>
+              <div class="spark-bar h-100 danger-bar"></div>
+            </div>
           </div>
         </div>
 
-        <div class="metric-card hero-metric">
-          <div class="metric-header">
-            <span class="metric-title">Weekly Financial Leakage</span>
-            <span class="metric-tag danger">Revenue Loss</span>
+        <!-- Bento Tile 2: Enterprise Breach Rate -->
+        <div class="bento-card">
+          <div class="bento-card-spotlight"></div>
+          <div class="bento-content">
+            <div class="bento-header">
+              <span class="bento-tag warning-tag">SLA Risk</span>
+              <span class="bento-meta">Overall</span>
+            </div>
+            <div class="bento-num text-gradient-amber" id="kpi-breach-rate">28.09%</div>
+            <div class="bento-submetric">
+              <span id="kpi-breached-count">6,560</span> delayed transitions
+            </div>
+            <p class="bento-desc">
+              Percentage of inter-departmental ticket handoffs exceeding SLA policy duration limits.
+            </p>
           </div>
-          <div class="metric-value-row">
-            <span class="metric-value text-rose" id="kpi-weekly-leakage">$1.30M</span>
-            <span class="metric-unit">/ week</span>
+        </div>
+
+        <!-- Bento Tile 3: Cumulative Delay Hours -->
+        <div class="bento-card">
+          <div class="bento-card-spotlight"></div>
+          <div class="bento-content">
+            <div class="bento-header">
+              <span class="bento-tag neutral-tag">Delay Hours</span>
+              <span class="bento-meta">90-Day Scope</span>
+            </div>
+            <div class="bento-num text-gradient-indigo" id="kpi-total-delay">105,138h</div>
+            <div class="bento-submetric">
+              Mean duration: <strong id="kpi-avg-duration">16.7h</strong>
+            </div>
+            <p class="bento-desc">
+              Total cumulative hours tickets remained blocked or delayed beyond scheduled SLA thresholds.
+            </p>
           </div>
-          <div class="metric-footer">
-            <span class="foot-label">INR Equivalent</span>
-            <span class="foot-val text-rose" id="kpi-inr-benchmark">800.71 Lakh / week</span>
+        </div>
+
+        <!-- Bento Tile 4: Synthetic Tickets & Transitions (Full width or compact) -->
+        <div class="bento-card bento-col-4">
+          <div class="bento-card-spotlight"></div>
+          <div class="bento-content bento-row-flex">
+            <div class="bento-stat-item">
+              <span class="stat-subtitle">Synthetic Workflow Tickets</span>
+              <div class="stat-bignum" id="kpi-total-tickets">10,000</div>
+              <span class="stat-caption">Jira &bull; ServiceNow Change Audit Log</span>
+            </div>
+            <div class="bento-vdivider"></div>
+            <div class="bento-stat-item">
+              <span class="stat-subtitle">Department Transitions Tracked</span>
+              <div class="stat-bignum" id="kpi-total-transitions">23,356</div>
+              <span class="stat-caption">Operations &bull; Category &bull; Supply Chain &bull; Central</span>
+            </div>
+            <div class="bento-vdivider"></div>
+            <div class="bento-stat-item">
+              <span class="stat-subtitle">Top 3 Pareto Delay Share</span>
+              <div class="stat-bignum text-gradient-rose" id="pareto-summary-pill">93.08%</div>
+              <span class="stat-caption">80/20 Rule: 3 Corridors drive 93% of delays</span>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Layout Split: Top Bottlenecks + Diagnostics -->
-      <div class="content-split">
-        <!-- Bottleneck Corridors -->
-        <section class="panel-section flex-3" aria-labelledby="bottlenecks-title">
-          <div class="panel-header">
+      <!-- Layout Split: Bottlenecks + Diagnostics -->
+      <div class="content-split-layout">
+        <!-- Bottleneck Corridors Stream -->
+        <section class="section-container flex-3" aria-labelledby="corridors-heading">
+          <div class="section-title-bar">
             <div>
-              <h2 id="bottlenecks-title" class="panel-heading">Critical Bottleneck Corridors</h2>
-              <p class="panel-desc">Calculated via SQL window functions (<code>SUM OVER</code> &amp; <code>DENSE_RANK</code>). Top 3 generate &gt;80% of delay friction.</p>
-            </div>
-            <div class="pareto-badge" id="pareto-summary-pill">
-              <span class="badge-dot"></span>
-              <span>93.08% Enterprise Delay Share</span>
+              <h2 id="corridors-heading" class="gradient-heading">Top 3 Critical Bottleneck Corridors</h2>
+              <p class="section-subtext">Pinpointed via windowed <code>SUM() OVER ()</code> and <code>DENSE_RANK()</code>. These 3 corridors cause 93% of enterprise delays.</p>
             </div>
           </div>
 
-          <div class="corridors-stream" id="top-bottlenecks-list">
+          <div class="corridors-grid" id="top-bottlenecks-list">
             <!-- Dynamically populated via app.js -->
           </div>
         </section>
 
-        <!-- Friction Diagnostics Column -->
-        <section class="panel-section flex-2" aria-labelledby="diagnostics-title">
-          <div class="panel-header">
-            <div>
-              <h2 id="diagnostics-title" class="panel-heading">Executive Diagnostics</h2>
-              <p class="panel-desc">Cross-functional workflow analysis</p>
-            </div>
+        <!-- Operational Diagnostics -->
+        <section class="section-container flex-2" aria-labelledby="diagnostics-heading">
+          <div class="section-title-bar">
+            <h2 id="diagnostics-heading" class="gradient-heading">Diagnostic Insights</h2>
           </div>
 
           <div class="diagnostics-stack">
-            <div class="diag-card">
-              <div class="diag-num-badge">01</div>
-              <div class="diag-body">
-                <h3 class="diag-card-title">Pareto Delay Concentration</h3>
-                <p class="diag-card-text">
-                  Enterprise workflow friction is heavily clustered. Just <strong>3 out of 10 departmental corridors</strong> account for <strong>93.08%</strong> of all SLA delay hours across Operations, Category, and Supply Chain.
+            <div class="diag-card-aceternity">
+              <div class="diag-icon-wrapper">
+                <span>01</span>
+              </div>
+              <div class="diag-content">
+                <h3 class="diag-heading">Pareto Concentration</h3>
+                <p class="diag-body">
+                  Organizational drag is concentrated: <strong>3 out of 10 corridors</strong> produce <strong>93.08%</strong> of all SLA delay hours across Operations, Category, and Supply Chain.
                 </p>
               </div>
             </div>
 
-            <div class="diag-card">
-              <div class="diag-num-badge">02</div>
-              <div class="diag-body">
-                <h3 class="diag-card-title">Downstream Cascading Effects</h3>
-                <p class="diag-card-text">
-                  Advanced <code>LAG</code> window queries reveal that upstream Category onboarding stalls directly trigger downstream dock receiving delays in Supply Chain &amp; Operations.
+            <div class="diag-card-aceternity">
+              <div class="diag-icon-wrapper">
+                <span>02</span>
+              </div>
+              <div class="diag-content">
+                <h3 class="diag-heading">Cascading Window Effects</h3>
+                <p class="diag-body">
+                  Window analysis with <code>LAG()</code> proves that Category onboarding stalls cascade directly into Supply Chain receiving, creating inbound warehouse dock congestion.
                 </p>
               </div>
             </div>
 
-            <div class="diag-card">
-              <div class="diag-num-badge">03</div>
-              <div class="diag-body">
-                <h3 class="diag-card-title">Reclamation Target</h3>
-                <p class="diag-card-text">
+            <div class="diag-card-aceternity">
+              <div class="diag-icon-wrapper">
+                <span>03</span>
+              </div>
+              <div class="diag-content">
+                <h3 class="diag-heading">Immediate Reclamation Target</h3>
+                <p class="diag-body">
                   Automating Supply Chain approvals is projected to reclaim <strong>120 operational hours weekly</strong>, yielding direct operational savings of <strong>₹11.75 Lakh/week ($19.1k/week)</strong>.
                 </p>
               </div>
@@ -270,142 +254,142 @@
 
     <!-- TAB 2: FINANCIAL SIMULATOR -->
     <div role="tabpanel" class="tab-pane" id="tab-simulator" aria-labelledby="tab-btn-simulator" hidden>
-      <section class="panel-section" aria-labelledby="sim-title">
-        <div class="panel-header">
+      <section class="section-container" aria-labelledby="sim-heading">
+        <div class="section-title-bar flex-between">
           <div>
-            <h2 id="sim-title" class="panel-heading">Algorithmic Financial Leakage Calculator</h2>
-            <p class="panel-desc">Model top-down commercial and operational variables to quantify estimated GMV loss and operational burn.</p>
+            <h2 id="sim-heading" class="gradient-heading">The Guesstimate Simulation Engine</h2>
+            <p class="section-subtext">Dynamically model commercial variables to calculate Gross Merchandise Value (GMV) drop and operational burn.</p>
           </div>
-          <div class="currency-picker">
-            <label for="currency-select" class="currency-label">Currency Unit</label>
-            <div class="select-wrapper">
-              <select id="currency-select" class="select-control">
-                <option value="USD" selected>USD ($ - Global)</option>
-                <option value="INR">INR (₹ - Lakhs / Crores)</option>
-                <option value="EUR">EUR (€ - European)</option>
-              </select>
-            </div>
+          <div class="currency-toggle-wrap">
+            <label for="currency-select" class="currency-text">Currency Unit:</label>
+            <select id="currency-select" class="aceternity-select">
+              <option value="USD" selected>USD ($ - Global)</option>
+              <option value="INR">INR (₹ - Lakhs / Crores)</option>
+              <option value="EUR">EUR (€ - European)</option>
+            </select>
           </div>
         </div>
 
-        <div class="simulator-grid">
-          <!-- Input Controls -->
-          <div class="sim-panel inputs-panel">
-            <h3 class="sim-panel-title">Model Inputs</h3>
+        <div class="simulator-bento">
+          <!-- Left: Input Sliders -->
+          <div class="sim-card sim-inputs">
+            <h3 class="sim-card-heading">Top-Down Commercial Variables</h3>
 
-            <div class="control-box">
-              <div class="control-top">
-                <label for="slider-aov" class="control-label">Average Order Value (AOV)</label>
-                <div class="input-tag-wrap">
-                  <span class="currency-tag" id="currency-sym-1">$</span>
-                  <input type="number" id="num-aov" class="num-input" min="1" max="100000" value="45">
+            <div class="sim-input-item">
+              <div class="input-header-row">
+                <label for="slider-aov" class="sim-input-label">Average Order Value (AOV)</label>
+                <div class="sim-numeric-pill">
+                  <span class="pill-sym" id="currency-sym-1">$</span>
+                  <input type="number" id="num-aov" class="pill-input" min="1" max="100000" value="45">
                 </div>
               </div>
-              <input type="range" id="slider-aov" class="styled-range" min="10" max="250" step="5" value="45">
-              <div class="range-limits">
+              <input type="range" id="slider-aov" class="aceternity-range" min="10" max="250" step="5" value="45">
+              <div class="slider-labels">
                 <span id="aov-bound-min">$10</span>
                 <span id="aov-bound-max">$250</span>
               </div>
             </div>
 
-            <div class="control-box">
-              <div class="control-top">
-                <label for="slider-daily-tx" class="control-label">Daily Transaction Volume</label>
-                <div class="input-tag-wrap">
-                  <input type="number" id="num-daily-tx" class="num-input" min="500" max="100000" step="500" value="10000">
-                  <span class="currency-tag">tx</span>
+            <div class="sim-input-item">
+              <div class="input-header-row">
+                <label for="slider-daily-tx" class="sim-input-label">Daily Transactions</label>
+                <div class="sim-numeric-pill">
+                  <input type="number" id="num-daily-tx" class="pill-input" min="500" max="100000" step="500" value="10000">
+                  <span class="pill-sym">orders</span>
                 </div>
               </div>
-              <input type="range" id="slider-daily-tx" class="styled-range" min="1000" max="50000" step="1000" value="10000">
-              <div class="range-limits">
+              <input type="range" id="slider-daily-tx" class="aceternity-range" min="1000" max="50000" step="1000" value="10000">
+              <div class="slider-labels">
                 <span>1,000 / day</span>
                 <span>50,000 / day</span>
               </div>
             </div>
 
-            <div class="control-box">
-              <div class="control-top">
-                <label for="slider-rev-drop" class="control-label">Revenue Drop / Delay Hour</label>
-                <div class="input-tag-wrap">
-                  <input type="number" id="num-rev-drop" class="num-input" min="0.05" max="3.0" step="0.05" value="0.5">
-                  <span class="currency-tag">%</span>
+            <div class="sim-input-item">
+              <div class="input-header-row">
+                <label for="slider-rev-drop" class="sim-input-label">Revenue Drop / Delay Hour</label>
+                <div class="sim-numeric-pill">
+                  <input type="number" id="num-rev-drop" class="pill-input" min="0.05" max="3.0" step="0.05" value="0.5">
+                  <span class="pill-sym">%</span>
                 </div>
               </div>
-              <input type="range" id="slider-rev-drop" class="styled-range" min="0.1" max="2.0" step="0.05" value="0.5">
-              <div class="range-limits">
-                <span>0.10%</span>
-                <span>2.00%</span>
+              <input type="range" id="slider-rev-drop" class="aceternity-range" min="0.1" max="2.0" step="0.05" value="0.5">
+              <div class="slider-labels">
+                <span>0.10% / hr</span>
+                <span>2.00% / hr</span>
               </div>
             </div>
 
-            <div class="control-box">
-              <div class="control-top">
-                <label for="slider-ops-cost" class="control-label">Operational Burn / Delay Hour</label>
-                <div class="input-tag-wrap">
-                  <span class="currency-tag" id="currency-sym-2">$</span>
-                  <input type="number" id="num-ops-cost" class="num-input" min="10" max="10000" step="5" value="65">
+            <div class="sim-input-item">
+              <div class="input-header-row">
+                <label for="slider-ops-cost" class="sim-input-label">Ops Burn / Delay Hour</label>
+                <div class="sim-numeric-pill">
+                  <span class="pill-sym" id="currency-sym-2">$</span>
+                  <input type="number" id="num-ops-cost" class="pill-input" min="10" max="10000" step="5" value="65">
                 </div>
               </div>
-              <input type="range" id="slider-ops-cost" class="styled-range" min="20" max="200" step="5" value="65">
-              <div class="range-limits">
+              <input type="range" id="slider-ops-cost" class="aceternity-range" min="20" max="200" step="5" value="65">
+              <div class="slider-labels">
                 <span id="ops-bound-min">$20 / hr</span>
                 <span id="ops-bound-max">$200 / hr</span>
               </div>
             </div>
           </div>
 
-          <!-- Impact Projections -->
-          <div class="sim-panel outputs-panel">
-            <h3 class="sim-panel-title">Quantified Output</h3>
+          <!-- Right: Output Projections -->
+          <div class="sim-card sim-outputs">
+            <h3 class="sim-card-heading">Calculated Financial Impact</h3>
 
-            <div class="hero-output-box">
-              <span class="hero-output-label">Projected Weekly Financial Leakage</span>
-              <div class="hero-output-val" id="sim-out-weekly-total">$1,298,168</div>
-              <div class="hero-output-sub" id="sim-out-inr-benchmark">Equivalent: 800.71 Lakh / week</div>
-            </div>
-
-            <div class="output-cards-row">
-              <div class="sub-output-card">
-                <span class="sub-card-label">Weekly GMV Leaked</span>
-                <span class="sub-card-val text-rose" id="sim-out-weekly-gmv">$766,634</span>
-                <span class="sub-card-meta">Order fulfillment &amp; revenue drop</span>
-              </div>
-              <div class="sub-output-card">
-                <span class="sub-card-label">Weekly Ops Overhead</span>
-                <span class="sub-card-val text-amber" id="sim-out-weekly-ops">$531,533</span>
-                <span class="sub-card-meta">Idle capacity, expediting &amp; triage</span>
+            <div class="aceternity-callout-glow">
+              <div class="callout-inner">
+                <span class="callout-eyebrow">Projected Weekly Revenue Leakage</span>
+                <div class="callout-bignum text-gradient-rose" id="sim-out-weekly-total">$1,298,168</div>
+                <div class="callout-subtext" id="sim-out-inr-benchmark">Equivalent: 800.71 Lakh / week</div>
               </div>
             </div>
 
-            <h4 class="scenario-table-title">Sensitivity Scenario Comparison</h4>
-            <div class="scenario-container">
-              <table class="saas-table">
+            <div class="output-chips-grid">
+              <div class="output-chip">
+                <span class="chip-title">Weekly GMV at Risk</span>
+                <span class="chip-val text-rose" id="sim-out-weekly-gmv">$766,634</span>
+                <span class="chip-caption">Unrealized order value</span>
+              </div>
+              <div class="output-chip">
+                <span class="chip-title">Weekly Ops Overhead</span>
+                <span class="chip-val text-amber" id="sim-out-weekly-ops">$531,533</span>
+                <span class="chip-caption">Manual triage &amp; escalation</span>
+              </div>
+            </div>
+
+            <h4 class="scenario-eyebrow">Sensitivity Scenario Matrix</h4>
+            <div class="scenario-table-card">
+              <table class="aceternity-table">
                 <thead>
                   <tr>
                     <th>Scenario</th>
-                    <th>Sensitivity</th>
-                    <th class="num-align">Weekly Leakage</th>
-                    <th class="num-align">90-Day Total</th>
+                    <th>Rate</th>
+                    <th class="text-right">Weekly Leakage</th>
+                    <th class="text-right">90-Day Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td><span class="pill-scenario">Conservative</span></td>
-                    <td>0.25% drop / hr</td>
-                    <td class="num-align" id="sc-val-cons-weekly">$914.8k</td>
-                    <td class="num-align" id="sc-val-cons-total">$11.76M</td>
+                    <td><span class="scenario-badge conservative">Conservative</span></td>
+                    <td>0.25% / hr</td>
+                    <td class="text-right font-mono" id="sc-val-cons-weekly">$914.8k</td>
+                    <td class="text-right font-mono" id="sc-val-cons-total">$11.76M</td>
                   </tr>
-                  <tr class="active-scenario-row">
-                    <td><span class="pill-scenario baseline">Baseline Model</span></td>
-                    <td>0.50% drop / hr</td>
-                    <td class="num-align font-bold text-indigo" id="sc-val-base-weekly">$1.30M</td>
-                    <td class="num-align font-bold text-indigo" id="sc-val-base-total">$16.69M</td>
+                  <tr class="highlight-scenario-row">
+                    <td><span class="scenario-badge baseline">Baseline Model</span></td>
+                    <td>0.50% / hr</td>
+                    <td class="text-right font-mono font-bold text-gradient-rose" id="sc-val-base-weekly">$1.30M</td>
+                    <td class="text-right font-mono font-bold" id="sc-val-base-total">$16.69M</td>
                   </tr>
                   <tr>
-                    <td><span class="pill-scenario">Aggressive</span></td>
-                    <td>0.75% drop / hr</td>
-                    <td class="num-align" id="sc-val-aggr-weekly">$1.68M</td>
-                    <td class="num-align" id="sc-val-aggr-total">$21.62M</td>
+                    <td><span class="scenario-badge aggressive">Aggressive</span></td>
+                    <td>0.75% / hr</td>
+                    <td class="text-right font-mono" id="sc-val-aggr-weekly">$1.68M</td>
+                    <td class="text-right font-mono" id="sc-val-aggr-total">$21.62M</td>
                   </tr>
                 </tbody>
               </table>
@@ -415,17 +399,17 @@
       </section>
     </div>
 
-    <!-- TAB 3: PROCESS RFCS -->
+    <!-- TAB 3: AUTOMATION RFCS -->
     <div role="tabpanel" class="tab-pane" id="tab-automation" aria-labelledby="tab-btn-automation" hidden>
-      <section class="panel-section" aria-labelledby="rfcs-title">
-        <div class="panel-header">
+      <section class="section-container" aria-labelledby="rfcs-heading">
+        <div class="section-title-bar">
           <div>
-            <h2 id="rfcs-title" class="panel-heading">Process Simplification RFC Playbook</h2>
-            <p class="panel-desc">Data-backed automation proposals ranked by operational hours reclaimed and quantified weekly ROI.</p>
+            <h2 id="rfcs-heading" class="gradient-heading">Process Simplification RFC Playbook</h2>
+            <p class="section-subtext">Data-backed automation proposals ranked by operational hours reclaimed and quantified weekly ROI.</p>
           </div>
         </div>
 
-        <div class="rfcs-deck" id="rfcs-container">
+        <div class="rfcs-bento-grid" id="rfcs-container">
           <!-- Dynamically populated via app.js -->
         </div>
       </section>
@@ -433,35 +417,35 @@
 
     <!-- TAB 4: CORRIDOR MATRIX & SQL -->
     <div role="tabpanel" class="tab-pane" id="tab-matrix" aria-labelledby="tab-btn-matrix" hidden>
-      <section class="panel-section" aria-labelledby="matrix-title">
-        <div class="panel-header table-header-flex">
+      <section class="section-container" aria-labelledby="matrix-heading">
+        <div class="section-title-bar flex-between">
           <div>
-            <h2 id="matrix-title" class="panel-heading">Inter-Departmental Handoff Corridor Matrix</h2>
-            <p class="panel-desc">Complete tabular breakdown of durations, SLA targets, breach frequencies, and delay volumes.</p>
+            <h2 id="matrix-heading" class="gradient-heading">Inter-Departmental Handoff Corridor Matrix</h2>
+            <p class="section-subtext">Full tabular audit of all departmental transitions, breach frequencies, and delay volumes.</p>
           </div>
-          <div class="search-wrap">
-            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <div class="search-box-aceternity">
+            <svg class="search-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="search" id="corridor-search" class="search-input" placeholder="Search by department code (e.g. SCM, CAT, OPS)..." aria-label="Search corridors table">
+            <input type="search" id="corridor-search" class="search-field" placeholder="Filter by department (e.g. SCM, CAT, OPS)..." aria-label="Search corridors table">
           </div>
         </div>
 
         <!-- Accessible Responsive Table Container per Modern Web Guidance -->
-        <div tabindex="0" role="region" aria-labelledby="matrix-title" class="table-scroll-container">
-          <table class="saas-table" id="table-corridors">
+        <div tabindex="0" role="region" aria-labelledby="matrix-heading" class="aceternity-table-wrapper">
+          <table class="aceternity-table" id="table-corridors">
             <thead>
               <tr>
                 <th scope="col">Corridor</th>
                 <th scope="col">From Department</th>
                 <th scope="col">To Department</th>
-                <th scope="col" class="num-align">Volume</th>
-                <th scope="col" class="num-align">Avg Duration</th>
-                <th scope="col" class="num-align">SLA Target</th>
-                <th scope="col" class="num-align">Breach Rate</th>
-                <th scope="col" class="num-align">Delay Hours</th>
-                <th scope="col" class="num-align">Blockers</th>
+                <th scope="col" class="text-right">Volume</th>
+                <th scope="col" class="text-right">Avg Duration</th>
+                <th scope="col" class="text-right">SLA Target</th>
+                <th scope="col" class="text-right">Breach Rate</th>
+                <th scope="col" class="text-right">Delay Hours</th>
+                <th scope="col" class="text-right">Blockers</th>
               </tr>
             </thead>
             <tbody id="corridors-table-body">
@@ -472,17 +456,17 @@
       </section>
 
       <!-- Advanced SQL Window Query Inspector -->
-      <section class="panel-section sql-section" aria-labelledby="sql-title">
-        <div class="panel-header">
+      <section class="section-container sql-container" aria-labelledby="sql-heading">
+        <div class="section-title-bar flex-between">
           <div>
-            <h3 id="sql-title" class="panel-heading">Underlying Window Function SQL Query</h3>
-            <p class="panel-desc">PostgreSQL &amp; SQLite compatible query utilizing <code>LAG()</code>, <code>LEAD()</code>, and windowed running totals.</p>
+            <h3 id="sql-heading" class="gradient-heading font-sm">Underlying Window Function SQL Query</h3>
+            <p class="section-subtext">PostgreSQL &amp; SQLite compatible query utilizing <code>LAG()</code>, <code>LEAD()</code>, and windowed running totals.</p>
           </div>
-          <button class="btn btn-secondary btn-sm" id="btn-copy-sql">
+          <button class="aceternity-btn-subtle" id="btn-copy-sql">
             <span>Copy SQL</span>
           </button>
         </div>
-        <pre class="code-editor"><code id="sql-code-display">-- Enterprise Bottleneck Window Analytics (PostgreSQL &amp; SQLite compatible)
+        <pre class="code-terminal"><code id="sql-code-display">-- Enterprise Bottleneck Window Analytics (PostgreSQL &amp; SQLite compatible)
 WITH TransitionSummary AS (
     SELECT 
         d_from.code || ' -> ' || d_to.code AS handoff_corridor,
@@ -528,15 +512,16 @@ SELECT * FROM CorridorRankings WHERE bottleneck_rank &lt;= 3;</code></pre>
     </div>
   </main>
 
-  <footer class="app-footer">
-    <div class="footer-wrap">
-      <div class="footer-brand">
-        <span class="footer-title">WorkflowSLA</span>
-        <span class="footer-sep">&bull;</span>
-        <span class="footer-sub">Cross-Functional Operations &amp; Blockage Tracker</span>
+  <!-- Footer -->
+  <footer class="aceternity-footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand-title">WorkflowSLA</span>
+        <span class="footer-dot">&bull;</span>
+        <span class="footer-desc">Cross-Functional Operations &amp; Blockage Tracker</span>
       </div>
-      <div class="footer-meta">
-        Relational Engine (PostgreSQL / SQLite) &bull; FastAPI Backend
+      <div class="footer-right">
+        Built with FastAPI, SQLAlchemy &amp; Aceternity UI Aesthetics
       </div>
     </div>
   </footer>

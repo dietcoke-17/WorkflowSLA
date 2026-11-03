@@ -1,7 +1,7 @@
 /**
- * WorkflowSLA: High-Level SaaS Client (Linear / Stripe Inspired)
- * Implements theme toggle persistence, real-time reactive modeling,
- * two-way slider synchronization, and instant table search.
+ * WorkflowSLA: Aceternity UI Dynamic Controller
+ * Features Interactive Spotlight Hover, Dynamic Bento Grid Updates,
+ * Real-Time Financial Guesstimations, and Table Filtering.
  */
 
 let currentCurrency = "USD";
@@ -9,14 +9,11 @@ let cachedCorridors = [];
 
 // DOM References
 const dom = {
-  // Theme Toggle
-  btnThemeToggle: document.getElementById("btn-theme-toggle"),
-
   // Tabs
-  tabButtons: document.querySelectorAll(".seg-btn"),
+  tabButtons: document.querySelectorAll(".tab-pill"),
   tabPanes: document.querySelectorAll(".tab-pane"),
 
-  // Overview KPIs
+  // KPIs
   kpiTotalTickets: document.getElementById("kpi-total-tickets"),
   kpiTotalTransitions: document.getElementById("kpi-total-transitions"),
   kpiBreachRate: document.getElementById("kpi-breach-rate"),
@@ -25,8 +22,9 @@ const dom = {
   kpiAvgDuration: document.getElementById("kpi-avg-duration"),
   kpiWeeklyLeakage: document.getElementById("kpi-weekly-leakage"),
   kpiInrBenchmark: document.getElementById("kpi-inr-benchmark"),
+  syncStamp: document.getElementById("sync-stamp"),
 
-  // Bottlenecks & Playbook
+  // Corridors & Playbook
   topBottlenecksList: document.getElementById("top-bottlenecks-list"),
   paretoSummaryPill: document.getElementById("pareto-summary-pill"),
   rfcsContainer: document.getElementById("rfcs-container"),
@@ -56,7 +54,7 @@ const dom = {
   simOutWeeklyGmv: document.getElementById("sim-out-weekly-gmv"),
   simOutWeeklyOps: document.getElementById("sim-out-weekly-ops"),
 
-  // Scenario Table
+  // Scenarios Table
   scValConsWeekly: document.getElementById("sc-val-cons-weekly"),
   scValConsTotal: document.getElementById("sc-val-cons-total"),
   scValBaseWeekly: document.getElementById("sc-val-base-weekly"),
@@ -68,28 +66,22 @@ const dom = {
   corridorSearch: document.getElementById("corridor-search"),
   corridorsTableBody: document.getElementById("corridors-table-body"),
 
-  // Top Nav Actions
+  // Action Buttons
   btnRefresh: document.getElementById("btn-refresh"),
   btnReseed: document.getElementById("btn-reseed"),
   btnCopySql: document.getElementById("btn-copy-sql"),
-  lastSyncTime: document.getElementById("last-sync-time"),
 };
 
-/** Theme Toggling per Modern Web Guidance (dark-mode-toggle) */
-function initThemeToggle() {
-  if (!dom.btnThemeToggle) return;
-
-  dom.btnThemeToggle.addEventListener("click", () => {
-    const metaTag = document.querySelector('meta[name="color-scheme"]');
-    const currentTheme = metaTag ? metaTag.content : "dark";
-    const targetTheme = currentTheme === "dark" ? "light" : "dark";
-
-    if (metaTag) {
-      metaTag.content = targetTheme;
-    }
-    try {
-      localStorage.setItem("color-scheme", targetTheme);
-    } catch (e) {}
+/** Aceternity Mouse Spotlight Effect */
+function initAceternitySpotlight() {
+  document.querySelectorAll(".bento-card, .corridor-glass-card, .rfc-bento-card").forEach(card => {
+    card.addEventListener("mousemove", e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty("--mouse-x", `${x}px`);
+      card.style.setProperty("--mouse-y", `${y}px`);
+    });
   });
 }
 
@@ -114,6 +106,7 @@ function initTabNavigation() {
       if (targetPane) {
         targetPane.classList.add("active");
         targetPane.hidden = false;
+        initAceternitySpotlight();
       }
     });
   });
@@ -138,7 +131,7 @@ async function fetchBottlenecks() {
   }
 }
 
-/** Fetch All Corridor Pair Data */
+/** Fetch All Corridor Friction Data */
 async function fetchCorridors() {
   try {
     const res = await fetch("/metrics/department-friction");
@@ -157,7 +150,7 @@ function renderDashboard(data) {
   const worstHandoffs = data.worst_performing_handoffs || [];
   const recs = data.data_backed_recommendations || [];
 
-  // 1. Metric Tiles
+  // 1. Metric Bento Grid
   if (dom.kpiTotalTickets) dom.kpiTotalTickets.textContent = Number(ent.total_tickets || 10000).toLocaleString();
   if (dom.kpiTotalTransitions) dom.kpiTotalTransitions.textContent = Number(ent.total_transitions || 23356).toLocaleString();
   if (dom.kpiBreachRate) dom.kpiBreachRate.textContent = `${ent.overall_breach_rate_pct || 28.09}%`;
@@ -165,9 +158,9 @@ function renderDashboard(data) {
   if (dom.kpiTotalDelay) dom.kpiTotalDelay.textContent = `${Math.round(ent.total_breach_hours || impact.total_delay_hours).toLocaleString()}h`;
   if (dom.kpiAvgDuration) dom.kpiAvgDuration.textContent = `${ent.avg_transition_hours || 16.7}h`;
   if (dom.kpiWeeklyLeakage) dom.kpiWeeklyLeakage.textContent = impact.formatted_weekly_leakage || "$1.30M";
-  if (dom.kpiInrBenchmark) dom.kpiInrBenchmark.textContent = impact.inr_benchmark_weekly_leakage || "800.71 Lakh / week";
+  if (dom.kpiInrBenchmark) dom.kpiInrBenchmark.innerHTML = `Benchmark equivalent: <strong class="text-rose">${impact.inr_benchmark_weekly_leakage || '800.71 Lakh / week'}</strong>`;
 
-  // 2. Critical Bottlenecks (Linear Pipeline Card Look)
+  // 2. Critical Bottlenecks Stream (Aceternity Glass Cards)
   if (dom.topBottlenecksList) {
     dom.topBottlenecksList.innerHTML = "";
     let cumulative = 0;
@@ -175,38 +168,34 @@ function renderDashboard(data) {
     worstHandoffs.forEach(bn => {
       cumulative += bn.delay_share_pct;
       const card = document.createElement("div");
-      card.className = "corridor-item";
+      card.className = "corridor-glass-card";
       card.innerHTML = `
-        <div class="ci-header">
-          <div class="ci-flow">
-            <span class="ci-rank-pill">#${bn.bottleneck_rank} CORRIDOR</span>
-            <div class="ci-nodes">
-              <span>${bn.from_department}</span>
-              <span class="ci-arrow">&rarr;</span>
-              <span>${bn.to_department}</span>
-            </div>
+        <div class="cgc-top">
+          <div class="cgc-left">
+            <span class="cgc-rank-tag">RANK #${bn.bottleneck_rank}</span>
+            <span class="cgc-title">${bn.handoff_corridor} (${bn.from_department} &rarr; ${bn.to_department})</span>
           </div>
-          <span class="ci-share-text">${bn.delay_share_pct}% Total Delay</span>
+          <span class="cgc-delay-pct">${bn.delay_share_pct}% Enterprise Delay</span>
         </div>
-        <div class="ci-progress-bar">
-          <div class="ci-progress-fill" style="width: ${bn.delay_share_pct}%;"></div>
+        <div class="cgc-meter-track">
+          <div class="cgc-meter-fill" style="width: ${bn.delay_share_pct}%;"></div>
         </div>
-        <div class="ci-stats-row">
-          <div class="ci-stat">
-            <span class="stat-lbl">Breach Frequency</span>
-            <span class="stat-val text-amber">${bn.breach_rate_pct}% (${Number(bn.breach_count).toLocaleString()} breaches)</span>
+        <div class="cgc-metrics-grid">
+          <div class="cgc-metric-item">
+            <span class="cgc-label">Breach Frequency</span>
+            <span class="cgc-val text-amber">${bn.breach_rate_pct}% (${Number(bn.breach_count).toLocaleString()} breaches)</span>
           </div>
-          <div class="ci-stat">
-            <span class="stat-lbl">Mean Duration</span>
-            <span class="stat-val">${bn.avg_duration_hours}h <small style="color:var(--text-muted);">(SLA: ${bn.sla_target_hours}h)</small></span>
+          <div class="cgc-metric-item">
+            <span class="cgc-label">Mean Duration</span>
+            <span class="cgc-val">${bn.avg_duration_hours}h <small style="color:var(--text-muted); font-weight:400;">(Target: ${bn.sla_target_hours}h)</small></span>
           </div>
-          <div class="ci-stat">
-            <span class="stat-lbl">Weekly Leakage</span>
-            <span class="stat-val text-rose">${bn.formatted_weekly_leakage} / wk</span>
+          <div class="cgc-metric-item">
+            <span class="cgc-label">Weekly Leakage</span>
+            <span class="cgc-val text-rose">${bn.formatted_weekly_leakage} / wk</span>
           </div>
-          <div class="ci-stat">
-            <span class="stat-lbl">INR Equivalent</span>
-            <span class="stat-val">₹${bn.inr_lakhs_per_week} L/wk</span>
+          <div class="cgc-metric-item">
+            <span class="cgc-label">INR Equivalent</span>
+            <span class="cgc-val">₹${bn.inr_lakhs_per_week} L/wk</span>
           </div>
         </div>
       `;
@@ -214,39 +203,39 @@ function renderDashboard(data) {
     });
 
     if (dom.paretoSummaryPill) {
-      dom.paretoSummaryPill.innerHTML = `<span class="badge-dot"></span><span>${cumulative.toFixed(1)}% Combined Delay Share</span>`;
+      dom.paretoSummaryPill.textContent = `${cumulative.toFixed(1)}% Combined Delay Share`;
     }
   }
 
-  // 3. Process RFCs (Tab 3)
+  // 3. Process RFCs (Tab 3 Bento Deck)
   if (dom.rfcsContainer) {
     dom.rfcsContainer.innerHTML = "";
     recs.forEach((rec, idx) => {
       const tile = document.createElement("div");
-      tile.className = "rfc-tile";
+      tile.className = "rfc-bento-card";
       tile.innerHTML = `
-        <div class="rfc-tile-header">
-          <span class="rfc-chip">RFC-0${idx + 1} &bull; ${rec.corridor}</span>
-          <span class="rfc-conf">${Math.round(rec.confidence_score * 100)}% Confidence</span>
+        <div class="rfc-top-row">
+          <span class="rfc-number-chip">RFC-0${idx + 1} &bull; ${rec.corridor}</span>
+          <span class="rfc-confidence-pill">${Math.round(rec.confidence_score * 100)}% Confidence</span>
         </div>
-        <h3 class="rfc-headline">${rec.recommendation}</h3>
-        <p class="rfc-blueprint">${rec.action_item}</p>
-        <div class="rfc-roi-grid">
-          <div class="rfc-roi-item">
-            <span class="lbl">Reclaimable Effort</span>
-            <span class="val emerald">&darr; ${rec.projected_reclaimed_hours_weekly} hrs / week</span>
+        <h3 class="rfc-title-text">${rec.recommendation}</h3>
+        <p class="rfc-action-box">${rec.action_item}</p>
+        <div class="rfc-metrics-bar">
+          <div class="rfc-met-item">
+            <span class="rfc-met-lbl">Reclaimed Hours</span>
+            <span class="rfc-met-val emerald">&darr; ${rec.projected_reclaimed_hours_weekly} hrs / week</span>
           </div>
-          <div class="rfc-roi-item">
-            <span class="lbl">Weekly Savings</span>
-            <span class="val emerald">${rec.formatted_weekly_savings} / week</span>
+          <div class="rfc-met-item">
+            <span class="rfc-met-lbl">Weekly ROI Savings</span>
+            <span class="rfc-met-val emerald">${rec.formatted_weekly_savings} / wk</span>
           </div>
-          <div class="rfc-roi-item">
-            <span class="lbl">Annual Projected Value</span>
-            <span class="val">${rec.formatted_annual_savings}</span>
+          <div class="rfc-met-item">
+            <span class="rfc-met-lbl">Annual Value</span>
+            <span class="rfc-met-val">${rec.formatted_annual_savings}</span>
           </div>
-          <div class="rfc-roi-item">
-            <span class="lbl">Implementation Velocity</span>
-            <span class="val">${rec.implementation_effort}</span>
+          <div class="rfc-met-item">
+            <span class="rfc-met-lbl">Implementation Effort</span>
+            <span class="rfc-met-val">${rec.implementation_effort}</span>
           </div>
         </div>
       `;
@@ -274,6 +263,8 @@ function renderDashboard(data) {
     if (dom.scValAggrWeekly) dom.scValAggrWeekly.textContent = sc.aggressive.formatted_weekly_leakage;
     if (dom.scValAggrTotal) dom.scValAggrTotal.textContent = formatCurrency(sc.aggressive.weekly_leakage * (90 / 7));
   }
+
+  initAceternitySpotlight();
 }
 
 /** Render Table of Department Corridors */
@@ -283,21 +274,21 @@ function renderCorridorsTable(corridors) {
 
   corridors.forEach(c => {
     const tr = document.createElement("tr");
-    const isHighBreach = c.breach_rate_pct > 25.0;
+    const isHigh = c.breach_rate_pct > 25.0;
     tr.innerHTML = `
       <td><strong>${c.from_code} &rarr; ${c.to_code}</strong></td>
       <td>${c.from_department}</td>
       <td>${c.to_department}</td>
-      <td class="num-align">${Number(c.total_transitions).toLocaleString()}</td>
-      <td class="num-align">${c.avg_duration_hours}h</td>
-      <td class="num-align">${c.avg_sla_target_hours}h</td>
-      <td class="num-align">
-        <span class="tag-breach ${isHighBreach ? 'severe' : 'nominal'}">
+      <td class="text-right font-mono">${Number(c.total_transitions).toLocaleString()}</td>
+      <td class="text-right font-mono">${c.avg_duration_hours}h</td>
+      <td class="text-right font-mono">${c.avg_sla_target_hours}h</td>
+      <td class="text-right">
+        <span class="breach-pill ${isHigh ? 'high' : 'low'}">
           ${c.breach_rate_pct}%
         </span>
       </td>
-      <td class="num-align"><strong>${Math.round(c.total_breach_hours).toLocaleString()}h</strong></td>
-      <td class="num-align">${c.total_blockers}</td>
+      <td class="text-right font-mono"><strong>${Math.round(c.total_breach_hours).toLocaleString()}h</strong></td>
+      <td class="text-right font-mono">${c.total_blockers}</td>
     `;
     dom.corridorsTableBody.appendChild(tr);
   });
@@ -321,16 +312,16 @@ function formatCurrency(amount) {
   return `$${Number(amount).toLocaleString()}`;
 }
 
-/** Live Sync Timestamp */
+/** Sync Time Updater */
 function updateSyncTime() {
-  if (dom.lastSyncTime) {
-    dom.lastSyncTime.textContent = "Synced just now";
+  if (dom.syncStamp) {
+    dom.syncStamp.textContent = "Synced just now";
   }
 }
 
-/** Wire Event Handlers */
+/** Event Listeners Setup */
 function setupEventHandlers() {
-  // AOV Synchronized Controls
+  // AOV Synchronized Inputs
   dom.sliderAov.addEventListener("input", () => {
     dom.numAov.value = dom.sliderAov.value;
     fetchBottlenecks();
@@ -340,7 +331,7 @@ function setupEventHandlers() {
     fetchBottlenecks();
   });
 
-  // Daily Tx Synchronized Controls
+  // Daily Tx Synchronized Inputs
   dom.sliderDailyTx.addEventListener("input", () => {
     dom.numDailyTx.value = dom.sliderDailyTx.value;
     fetchBottlenecks();
@@ -350,7 +341,7 @@ function setupEventHandlers() {
     fetchBottlenecks();
   });
 
-  // Rev Drop Synchronized Controls
+  // Rev Drop Synchronized Inputs
   dom.sliderRevDrop.addEventListener("input", () => {
     dom.numRevDrop.value = dom.sliderRevDrop.value;
     fetchBottlenecks();
@@ -360,7 +351,7 @@ function setupEventHandlers() {
     fetchBottlenecks();
   });
 
-  // Ops Cost Synchronized Controls
+  // Ops Cost Synchronized Inputs
   dom.sliderOpsCost.addEventListener("input", () => {
     dom.numOpsCost.value = dom.sliderOpsCost.value;
     fetchBottlenecks();
@@ -370,7 +361,7 @@ function setupEventHandlers() {
     fetchBottlenecks();
   });
 
-  // Currency Switcher
+  // Currency Selector
   dom.currencySelect.addEventListener("change", (e) => {
     currentCurrency = e.target.value;
     const sym = currentCurrency === "INR" ? "₹" : (currentCurrency === "EUR" ? "€" : "$");
@@ -413,7 +404,7 @@ function setupEventHandlers() {
     fetchBottlenecks();
   });
 
-  // Search Filter on Table
+  // Corridor Search Filter
   if (dom.corridorSearch) {
     dom.corridorSearch.addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase().trim();
@@ -445,7 +436,7 @@ function setupEventHandlers() {
       const confirmed = confirm("Reseed 10,000+ workflow tickets & 23,000+ transitions?");
       if (!confirmed) return;
 
-      dom.btnReseed.innerHTML = "<span>Reseeding...</span>";
+      dom.btnReseed.textContent = "Reseeding...";
       dom.btnReseed.disabled = true;
 
       try {
@@ -457,7 +448,7 @@ function setupEventHandlers() {
       } catch (err) {
         alert("Error reseeding dataset: " + err);
       } finally {
-        dom.btnReseed.innerHTML = "<span>Reseed 10k</span>";
+        dom.btnReseed.textContent = "Reseed 10k";
         dom.btnReseed.disabled = false;
       }
     });
@@ -469,9 +460,9 @@ function setupEventHandlers() {
       const code = document.getElementById("sql-code-display")?.innerText;
       if (code) {
         navigator.clipboard.writeText(code).then(() => {
-          dom.btnCopySql.innerHTML = "<span>Copied!</span>";
+          dom.btnCopySql.textContent = "Copied!";
           setTimeout(() => {
-            dom.btnCopySql.innerHTML = "<span>Copy SQL</span>";
+            dom.btnCopySql.textContent = "Copy SQL";
           }, 2000);
         });
       }
@@ -481,9 +472,9 @@ function setupEventHandlers() {
 
 // Initial Boot
 window.addEventListener("DOMContentLoaded", () => {
-  initThemeToggle();
   initTabNavigation();
   setupEventHandlers();
   fetchBottlenecks();
   fetchCorridors();
+  initAceternitySpotlight();
 });
