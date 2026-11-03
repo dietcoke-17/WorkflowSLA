@@ -67,6 +67,8 @@ const dom = {
   corridorsTableBody: document.getElementById("corridors-table-body"),
 
   // Action Buttons
+  btnThemeToggle: document.getElementById("btn-theme-toggle"),
+  themeToggleLabel: document.getElementById("theme-toggle-label"),
   btnRefresh: document.getElementById("btn-refresh"),
   btnReseed: document.getElementById("btn-reseed")
 };
@@ -457,8 +459,34 @@ function setupEventHandlers() {
   }
 }
 
+/** Theme Controller (Supports Light Mode and Dark Mode) */
+function initThemeToggle() {
+  const root = document.documentElement;
+  // Default to light mode as requested, or load user's saved preference
+  const savedTheme = localStorage.getItem("workflowsla-theme") || "light";
+  root.setAttribute("data-theme", savedTheme);
+  updateThemeUI(savedTheme);
+
+  if (dom.btnThemeToggle) {
+    dom.btnThemeToggle.addEventListener("click", () => {
+      const current = root.getAttribute("data-theme") || "light";
+      const next = current === "light" ? "dark" : "light";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem("workflowsla-theme", next);
+      updateThemeUI(next);
+    });
+  }
+
+  function updateThemeUI(theme) {
+    if (dom.themeToggleLabel) {
+      dom.themeToggleLabel.textContent = theme === "light" ? "Light" : "Dark";
+    }
+  }
+}
+
 // Initial Boot
 window.addEventListener("DOMContentLoaded", () => {
+  initThemeToggle();
   initTabNavigation();
   setupEventHandlers();
   fetchBottlenecks();
