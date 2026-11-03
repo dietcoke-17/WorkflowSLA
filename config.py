@@ -16,7 +16,13 @@ if VENDOR_DIR.exists() and str(VENDOR_DIR) not in sys.path:
 BASE_DIR = ROOT_DIR
 
 # Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{ROOT_DIR}/workflowsla.db")
+is_serverless = os.getenv("VERCEL") is not None or os.getenv("AWS_LAMBDA_FUNCTION_NAME") is not None
+if is_serverless and not os.getenv("DATABASE_URL"):
+    default_db_path = "/tmp/workflowsla.db"
+else:
+    default_db_path = f"{ROOT_DIR}/workflowsla.db"
+
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{default_db_path}")
 
 # Server configuration
 HOST = os.getenv("HOST", "0.0.0.0")

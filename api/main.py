@@ -76,8 +76,15 @@ sim_engine = FinancialSimulationEngine(sql_engine)
 
 @app.on_event("startup")
 def startup_event():
-    """Ensure database schema is created on startup."""
+    """Ensure database schema is created and populated on startup."""
     init_db()
+    try:
+        from database.connection import get_db_context
+        with get_db_context() as db:
+            if db.query(Ticket).count() == 0:
+                generate_synthetic_dataset(db, ticket_count=10000)
+    except Exception as e:
+        print(f"Startup data check: {e}")
 
 
 @app.get("/", tags=["Dashboard"])
